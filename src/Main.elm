@@ -1,4 +1,4 @@
-module Main exposing (Chapter, Story, Ui, app)
+module Main exposing (Chapter, Story, Ui, book)
 
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation exposing (Key, load, pushUrl)
@@ -10,6 +10,7 @@ import Html.Styled.Attributes exposing (..)
 import Html.Styled.Events exposing (onClick)
 import Route exposing (Route, href)
 import Url exposing (Url)
+import Views.Ui.Input as Input
 
 
 
@@ -227,7 +228,7 @@ menuChaptersView chapters =
         [ List.map menuChapterView chapters
             |> ul
                 [ css
-                    [ listStyle none, padding (px 10), Css.width (px 200) ]
+                    [ listStyle none, padding (px 10), Css.width (px 200), marginTop (px 30) ]
                 ]
         ]
 
@@ -236,7 +237,9 @@ uiItemView : Chapter -> String -> Ui -> Html msg
 uiItemView chapter story ui =
     li
         [ css
-            [ Css.width (px 80)
+            [ minWidth (px 80)
+            , first
+                [ margin4 zero zero zero (px 20) ]
             ]
         ]
         [ a
@@ -246,12 +249,14 @@ uiItemView chapter story ui =
                 , backgroundColor (rgb 255 255 255)
                 , Css.width (px 80)
                 , Css.height (px 30)
-                , display block
+                , Css.property "display" "grid"
+                , Css.property "align-items" "center"
                 , textAlign center
                 , color (rgb 0 0 0)
                 , padding (px 10)
+                , borderBottom3 (px 3) solid (rgb 255 255 255)
                 , hover
-                    [ borderBottom3 (px 3) solid (rgb 99 167 245)
+                    [ borderBottom3 (px 3) solid (rgba 99 167 245 0.8)
                     ]
                 ]
             ]
@@ -285,6 +290,7 @@ contentView model =
                     , Css.property "align-items" "flex-end"
                     , listStyle none
                     , padding zero
+                    , Css.width (pct 100)
                     ]
                 ]
         , div
@@ -303,11 +309,14 @@ bodyView model =
         [ html
             [ margin zero
             , padding zero
+            ]
+        , body
+            [ margin zero
+            , padding zero
             , fontFamilies [ "Montserrat", .value serif ]
             , fontSize (px 16)
             , boxSizing borderBox
             ]
-        , body [ margin zero, padding zero ]
         ]
         |> toUnstyled
     , div
@@ -324,13 +333,13 @@ bodyView model =
     ]
 
 
-app : List Chapter -> Program () Model Msg
-app chapters =
+book : List Chapter -> Program () Model Msg
+book chapters =
     Browser.application
         { init = init chapters
         , onUrlChange = UrlChanged
         , onUrlRequest = UrlRequested
-        , subscriptions = \model -> Sub.none
+        , subscriptions = always Sub.none
         , update = update
         , view = view
         }
@@ -345,7 +354,8 @@ chapterList =
             ]
           )
         , ( "Inputs"
-          , [ { name = "Input", view = buttonView "input" }
+          , [ { name = "Default", view = Input.default [] [] }
+            , { name = "Small", view = Input.small [] [] }
             ]
           )
         ]
@@ -360,4 +370,4 @@ buttonView string =
 
 main : Program () Model Msg
 main =
-    app chapterList
+    book chapterList
