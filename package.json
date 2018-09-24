@@ -9,7 +9,7 @@
     "elm-live": "^3.0.4"
   },
   "scripts": {
-    "live": "elm-live src/Main.elm --dir=./public/ --pushstate -- --output=./public/app.js",
+    "live": "elm-live src/Main.elm --dir=./public/ -- --output=./public/app.js --debug",
     "start": "npm run live"
   },
   "author": "Allo-Media<contact@allo-media.fr>",
