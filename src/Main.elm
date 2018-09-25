@@ -1,4 +1,4 @@
-module Book exposing (Chapter, Story, Ui, bind)
+module Book exposing (Chapter, Story, Ui, book)
 
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation exposing (Key, load, pushUrl)
@@ -442,12 +442,14 @@ contentView ({ bookmark, chapters } as model) =
             div []
                 [ submenuView bookmark chapter story
                 , div [ css [ padding (px 20) ] ]
-                    [ ui.view |> HA.map (\_ -> NoOp)
+                    [ ui.view |> HA.map (always NoOp)
                     ]
                 ]
 
         _ ->
-            div [] []
+            span []
+                [ text "No Bookmark"
+                ]
 
 
 bodyView : Model -> List (H.Html Msg)
@@ -480,8 +482,8 @@ bodyView ({ chapters, bookmark } as model) =
     ]
 
 
-bind : List Chapter -> Program () Model Msg
-bind chapters =
+book : List Chapter -> Program () Model Msg
+book chapters =
     Browser.application
         { init = init chapters
         , onUrlChange = UrlChanged
@@ -503,7 +505,7 @@ chapterList =
             ]
           )
         , ( "Inputs"
-          , [ { name = "Default", view = div [] [] }
+          , [ { name = "Default", view = div [ onClick NoOp ] [] }
             , { name = "Small", view = div [] [] }
             ]
           )
@@ -519,4 +521,4 @@ buttonView string =
 
 main : Program () Model Msg
 main =
-    bind chapterList
+    book chapterList
