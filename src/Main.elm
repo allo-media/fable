@@ -173,29 +173,111 @@ documentTitle ({ bookmark } as model) =
             ""
 
 
-sidebarStoryView : Chapter -> Story -> Html msg
-sidebarStoryView (( chapterTitle, _ ) as chapter) (( storyTitle, _ ) as story) =
-    li []
-        [ a
-            [ Route.href (Route.Story chapterTitle storyTitle)
-            , css
-                [ display block
-                , padding (px 5)
-                , cursor pointer
-                , color (rgb 255 255 255)
-                , textDecoration none
-                , hover
-                    [ backgroundColor (rgb 99 167 245)
-                    , borderRadius (px 3)
-                    ]
-                ]
-            ]
-            [ text storyTitle ]
-        ]
+sidebarStoryView : Bookmark -> Chapter -> Story -> Html msg
+sidebarStoryView bookmark (( chapterTitle, _ ) as chapter) (( storyTitle, _ ) as story) =
+    let
+        active =
+            case bookmark of
+                StoryBookmark chapterBookmark storyBookmark ->
+                    if storyTitle == Tuple.first storyBookmark then
+                        span
+                            [ css
+                                [ display block
+                                , padding (px 5)
+                                , cursor pointer
+                                , color (rgb 255 255 255)
+                                , textDecoration none
+                                , hover
+                                    [ backgroundColor (rgb 99 167 245)
+                                    , borderRadius (px 3)
+                                    ]
+                                , backgroundColor (rgba 99 167 245 0.8)
+                                , borderRadius (px 3)
+                                ]
+                            ]
+                            [ text storyTitle ]
+
+                    else
+                        li []
+                            [ a
+                                [ Route.href (Route.Story chapterTitle storyTitle)
+                                , css
+                                    [ display block
+                                    , padding (px 5)
+                                    , cursor pointer
+                                    , color (rgb 255 255 255)
+                                    , textDecoration none
+                                    , hover
+                                        [ backgroundColor (rgb 99 167 245)
+                                        , borderRadius (px 3)
+                                        ]
+                                    ]
+                                ]
+                                [ text storyTitle ]
+                            ]
+
+                UiBookmark _ storyBookmark ui ->
+                    if storyTitle == Tuple.first storyBookmark then
+                        span
+                            [ css
+                                [ display block
+                                , padding (px 5)
+                                , cursor pointer
+                                , color (rgb 255 255 255)
+                                , textDecoration none
+                                , hover
+                                    [ backgroundColor (rgb 99 167 245)
+                                    , borderRadius (px 3)
+                                    ]
+                                , backgroundColor (rgba 99 167 245 0.8)
+                                , borderRadius (px 3)
+                                ]
+                            ]
+                            [ text storyTitle ]
+
+                    else
+                        li []
+                            [ a
+                                [ Route.href (Route.Story chapterTitle storyTitle)
+                                , css
+                                    [ display block
+                                    , padding (px 5)
+                                    , cursor pointer
+                                    , color (rgb 255 255 255)
+                                    , textDecoration none
+                                    , hover
+                                        [ backgroundColor (rgb 99 167 245)
+                                        , borderRadius (px 3)
+                                        ]
+                                    ]
+                                ]
+                                [ text storyTitle ]
+                            ]
+
+                _ ->
+                    li []
+                        [ a
+                            [ Route.href (Route.Story chapterTitle storyTitle)
+                            , css
+                                [ display block
+                                , padding (px 5)
+                                , cursor pointer
+                                , color (rgb 255 255 255)
+                                , textDecoration none
+                                , hover
+                                    [ backgroundColor (rgb 99 167 245)
+                                    , borderRadius (px 3)
+                                    ]
+                                ]
+                            ]
+                            [ text storyTitle ]
+                        ]
+    in
+    li [] [ active ]
 
 
-sidebarChapterView : Chapter -> Html msg
-sidebarChapterView (( title, stories ) as chapter) =
+sidebarChapterView : Bookmark -> Chapter -> Html msg
+sidebarChapterView bookmark (( title, stories ) as chapter) =
     li []
         [ span
             [ css
@@ -207,7 +289,7 @@ sidebarChapterView (( title, stories ) as chapter) =
                 ]
             ]
             [ text title ]
-        , List.map (sidebarStoryView chapter) stories
+        , List.map (sidebarStoryView bookmark chapter) stories
             |> ul
                 [ css
                     [ listStyle none
@@ -217,8 +299,8 @@ sidebarChapterView (( title, stories ) as chapter) =
         ]
 
 
-sidebarView : List Chapter -> Html msg
-sidebarView chapters =
+sidebarView : Bookmark -> List Chapter -> Html msg
+sidebarView bookmark chapters =
     div
         [ css
             [ backgroundColor (rgb 47 51 56)
@@ -228,7 +310,7 @@ sidebarView chapters =
             , justifyContent center
             ]
         ]
-        [ List.map sidebarChapterView chapters
+        [ List.map (sidebarChapterView bookmark) chapters
             |> ul
                 [ css
                     [ listStyle none
@@ -240,10 +322,10 @@ sidebarView chapters =
         ]
 
 
-submenuView : Chapter -> Story -> Html msg
-submenuView chapter story =
+submenuView : Bookmark -> Chapter -> Story -> Html msg
+submenuView bookmark chapter story =
     div []
-        [ List.map (submenuUiView chapter (Tuple.first story)) (Tuple.second story)
+        [ List.map (submenuUiView bookmark chapter story) (Tuple.second story)
             |> ul
                 [ css
                     [ backgroundColor (rgb 248 248 248)
@@ -262,66 +344,104 @@ submenuView chapter story =
         ]
 
 
-submenuUiView : Chapter -> String -> Ui -> Html msg
-submenuUiView chapter story ui =
+submenuUiView : Bookmark -> Chapter -> Story -> Ui -> Html msg
+submenuUiView bookmark chapter story ui =
+    let
+        active =
+            case bookmark of
+                UiBookmark chapterBookmark storyBookmark uiBookmark ->
+                    if uiBookmark.name == ui.name then
+                        span
+                            [ Route.href (Route.Ui (Tuple.first chapter) (Tuple.first story) ui.name)
+                            , css
+                                [ textDecoration none
+                                , backgroundColor (rgb 255 255 255)
+                                , Css.width (px 80)
+                                , Css.height (px 30)
+                                , Css.property "display" "grid"
+                                , Css.property "align-items" "center"
+                                , textAlign center
+                                , color (rgb 0 0 0)
+                                , padding (px 10)
+                                , borderBottom3 (px 3) solid (rgba 99 167 245 1)
+                                , hover
+                                    [ borderBottom3 (px 3) solid (rgba 99 167 245 0.8)
+                                    ]
+                                ]
+                            ]
+                            [ text ui.name ]
+
+                    else
+                        a
+                            [ Route.href (Route.Ui (Tuple.first chapter) (Tuple.first story) ui.name)
+                            , css
+                                [ textDecoration none
+                                , backgroundColor (rgb 255 255 255)
+                                , Css.width (px 80)
+                                , Css.height (px 30)
+                                , Css.property "display" "grid"
+                                , Css.property "align-items" "center"
+                                , textAlign center
+                                , color (rgb 0 0 0)
+                                , padding (px 10)
+                                , borderBottom3 (px 3) solid (rgb 255 255 255)
+                                , hover
+                                    [ borderBottom3 (px 3) solid (rgba 99 167 245 0.8)
+                                    ]
+                                ]
+                            ]
+                            [ text ui.name ]
+
+                _ ->
+                    a
+                        [ Route.href (Route.Ui (Tuple.first chapter) (Tuple.first story) ui.name)
+                        , css
+                            [ textDecoration none
+                            , backgroundColor (rgb 255 255 255)
+                            , Css.width (px 80)
+                            , Css.height (px 30)
+                            , Css.property "display" "grid"
+                            , Css.property "align-items" "center"
+                            , textAlign center
+                            , color (rgb 0 0 0)
+                            , padding (px 10)
+                            , borderBottom3 (px 3) solid (rgba 255 255 255 1)
+                            , hover
+                                [ borderBottom3 (px 3) solid (rgba 99 167 245 0.8)
+                                ]
+                            ]
+                        ]
+                        [ text ui.name ]
+    in
     li
         [ css
             [ minWidth (px 80) ]
         ]
-        [ a
-            [ Route.href (Route.Ui (Tuple.first chapter) story ui.name)
-            , css
-                [ textDecoration none
-                , backgroundColor (rgb 255 255 255)
-                , Css.width (px 80)
-                , Css.height (px 30)
-                , Css.property "display" "grid"
-                , Css.property "align-items" "center"
-                , textAlign center
-                , color (rgb 0 0 0)
-                , padding (px 10)
-                , borderBottom3 (px 3) solid (rgb 255 255 255)
-                , hover
-                    [ borderBottom3 (px 3) solid (rgba 99 167 245 0.8)
-                    ]
-                ]
-            ]
-            [ text ui.name ]
-        ]
+        [ active ]
 
 
 contentView : Model -> HA.Html Msg
 contentView ({ bookmark, chapters } as model) =
     case bookmark of
         None ->
-            div [] []
+            div
+                [ css
+                    [ Css.property "display" "grid"
+                    , Css.property "justify-content" "center"
+                    , Css.property "align-content" "center"
+                    , fontSize (rem 2)
+                    , color (rgba 0 0 0 0.5)
+                    ]
+                ]
+                [ text "No bookmark" ]
 
         StoryBookmark chapter story ->
-            submenuView chapter story
+            submenuView bookmark chapter story
 
         UiBookmark chapter story ui ->
             div []
-                [ List.map (submenuUiView chapter (Tuple.first story)) (Tuple.second story)
-                    |> ul
-                        [ css
-                            [ backgroundColor (rgb 248 248 248)
-                            , borderBottom3 (px 1) solid (rgb 181 181 181)
-                            , margin zero
-                            , Css.height (px 80)
-                            , Css.property "display" "grid"
-                            , Css.property "grid-auto-flow" "column"
-                            , Css.property "justify-content" "flex-start"
-                            , Css.property "align-items" "flex-end"
-                            , listStyle none
-                            , padding zero
-                            , Css.width (pct 100)
-                            ]
-                        ]
-                , div
-                    [ css
-                        [ padding (px 20)
-                        ]
-                    ]
+                [ submenuView bookmark chapter story
+                , div [ css [ padding (px 20) ] ]
                     [ ui.view |> HA.map (\_ -> NoOp)
                     ]
                 ]
@@ -353,7 +473,7 @@ bodyView ({ chapters, bookmark } as model) =
             , Css.height (vh 100)
             ]
         ]
-        [ sidebarView chapters
+        [ sidebarView bookmark chapters
         , contentView model
         ]
         |> toUnstyled
