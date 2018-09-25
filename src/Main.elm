@@ -158,9 +158,7 @@ documentTitle ({ bookmark } as model) =
             ""
 
         StoryBookmark chapter story ->
-            Tuple.first story
-                |> (++) " :: "
-                |> (++) (Tuple.first chapter)
+            Tuple.first chapter ++ " :: " ++ Tuple.first story
 
         UiBookmark chapter story ui ->
             ui.name
