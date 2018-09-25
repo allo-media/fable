@@ -1,4 +1,4 @@
-module Main exposing (Chapter, Story, Ui, book)
+module Book exposing (Chapter, Story, Ui, book)
 
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation exposing (Key, load, pushUrl)
@@ -10,7 +10,6 @@ import Html.Styled.Attributes exposing (..)
 import Html.Styled.Events exposing (onClick)
 import Route exposing (Route, href)
 import Url exposing (Url)
-import Views.Ui.Input as Input
 
 
 
@@ -31,11 +30,16 @@ type alias Ui =
     }
 
 
+type Bookmark
+    = ChapterBookmark Chapter
+    | StoryBookmark Chapter Story
+    | UiBookmark Chapter Story Ui
+    | None
+
+
 type alias Model =
     { navKey : Key
-    , selectStory : String
-    , selectChapter : String
-    , selectUi : String
+    , bookmark : Bookmark
     , chapters : List Chapter
     }
 
@@ -46,75 +50,75 @@ type Msg
     | NoOp
 
 
-selectChapter : String -> List ( String, List Story ) -> Chapter
+selectChapter : String -> List Chapter -> Maybe Chapter
 selectChapter id chapts =
     List.filter (\( title, _ ) -> title == id) chapts
         |> List.head
-        |> Maybe.withDefault ( "Nothing", [] )
 
 
-selectStory : String -> List Story -> Story
-selectStory id storyList =
-    List.filter (\story -> Tuple.first story == id) storyList
+selectStory : String -> Chapter -> Maybe Story
+selectStory id (( title, stories ) as chapter) =
+    List.filter (\story -> Tuple.first story == id) stories
         |> List.head
-        |> Maybe.withDefault ( "Nothing", [] )
 
 
-selectUi : String -> List Ui -> Ui
-selectUi name uis =
+selectUi : String -> Story -> Maybe Ui
+selectUi name (( title, uis ) as storie) =
     List.filter (\ui -> ui.name == name) uis
         |> List.head
-        |> Maybe.withDefault { name = "Nothing", view = div [] [] }
 
 
 init : List Chapter -> () -> Url -> Key -> ( Model, Cmd Msg )
 init chap _ url key =
     setRoute (Route.fromUrl url)
         { navKey = key
-        , selectStory = ""
-        , selectChapter = ""
-        , selectUi = ""
+        , bookmark = None
         , chapters = chap
         }
 
 
+setUiBookmark : String -> String -> String -> Model -> Bookmark
+setUiBookmark chapterId storyId uiId ({ chapters } as model) =
+    case selectChapter chapterId chapters of
+        Nothing ->
+            None
+
+        Just chapter ->
+            case selectStory storyId chapter of
+                Nothing ->
+                    None
+
+                Just story ->
+                    selectUi uiId story
+                        |> Maybe.map (UiBookmark chapter story)
+                        |> Maybe.withDefault None
+
+
+setStoryBookmark : String -> String -> Model -> Bookmark
+setStoryBookmark chapterId storyId ({ chapters } as model) =
+    case selectChapter chapterId chapters of
+        Nothing ->
+            None
+
+        Just chapter ->
+            selectStory storyId chapter
+                |> Maybe.map (StoryBookmark chapter)
+                |> Maybe.withDefault None
+
+
 setRoute : Maybe Route -> Model -> ( Model, Cmd Msg )
-setRoute route model =
+setRoute route ({ chapters } as model) =
     case route of
         Nothing ->
             ( model, Cmd.none )
 
         Just (Route.Story chapterId storyId) ->
-            let
-                selectedChapter =
-                    selectChapter chapterId model.chapters
-
-                selectedStory =
-                    selectStory storyId (Tuple.second selectedChapter)
-            in
-            ( { model
-                | selectChapter = Tuple.first selectedChapter
-                , selectStory = Tuple.first selectedStory
-              }
+            ( { model | bookmark = setStoryBookmark chapterId storyId model }
             , Cmd.none
             )
 
-        Just (Route.Ui chapterId storyId ui) ->
-            let
-                selectedChapter =
-                    selectChapter chapterId model.chapters
-
-                selectedStory =
-                    selectStory storyId (Tuple.second selectedChapter)
-
-                selectedUi =
-                    selectUi ui (Tuple.second selectedStory)
-            in
-            ( { model
-                | selectChapter = Tuple.first selectedChapter
-                , selectStory = Tuple.first selectedStory
-                , selectUi = selectedUi.name
-              }
+        Just (Route.Ui chapterId storyId uiId) ->
+            ( { model | bookmark = setUiBookmark chapterId storyId uiId model }
             , Cmd.none
             )
 
@@ -148,51 +152,130 @@ view model =
 
 
 documentTitle : Model -> String
-documentTitle model =
+documentTitle ({ bookmark } as model) =
+    case bookmark of
+        None ->
+            ""
+
+        StoryBookmark chapter story ->
+            Tuple.first chapter ++ " :: " ++ Tuple.first story
+
+        UiBookmark chapter story ui ->
+            ui.name
+                |> (++) " :: "
+                |> (++) (Tuple.first story)
+                |> (++) " :: "
+                |> (++) (Tuple.first chapter)
+
+        _ ->
+            ""
+
+
+sidebarStoryView : Bookmark -> Chapter -> Story -> Html msg
+sidebarStoryView bookmark (( chapterTitle, _ ) as chapter) (( storyTitle, _ ) as story) =
     let
-        chapter =
-            selectChapter model.selectChapter model.chapters
+        active =
+            case bookmark of
+                StoryBookmark chapterBookmark storyBookmark ->
+                    if storyTitle == Tuple.first storyBookmark then
+                        span
+                            [ css
+                                [ display block
+                                , padding (px 5)
+                                , cursor pointer
+                                , color (rgb 255 255 255)
+                                , textDecoration none
+                                , hover
+                                    [ backgroundColor (rgb 99 167 245)
+                                    , borderRadius (px 3)
+                                    ]
+                                , backgroundColor (rgba 99 167 245 0.8)
+                                , borderRadius (px 3)
+                                ]
+                            ]
+                            [ text storyTitle ]
 
-        story =
-            selectStory model.selectStory (Tuple.second chapter)
+                    else
+                        li []
+                            [ a
+                                [ Route.href (Route.Story chapterTitle storyTitle)
+                                , css
+                                    [ display block
+                                    , padding (px 5)
+                                    , cursor pointer
+                                    , color (rgb 255 255 255)
+                                    , textDecoration none
+                                    , hover
+                                        [ backgroundColor (rgb 99 167 245)
+                                        , borderRadius (px 3)
+                                        ]
+                                    ]
+                                ]
+                                [ text storyTitle ]
+                            ]
 
-        ui =
-            selectUi model.selectUi (Tuple.second story)
+                UiBookmark _ storyBookmark ui ->
+                    if storyTitle == Tuple.first storyBookmark then
+                        span
+                            [ css
+                                [ display block
+                                , padding (px 5)
+                                , cursor pointer
+                                , color (rgb 255 255 255)
+                                , textDecoration none
+                                , hover
+                                    [ backgroundColor (rgb 99 167 245)
+                                    , borderRadius (px 3)
+                                    ]
+                                , backgroundColor (rgba 99 167 245 0.8)
+                                , borderRadius (px 3)
+                                ]
+                            ]
+                            [ text storyTitle ]
+
+                    else
+                        li []
+                            [ a
+                                [ Route.href (Route.Story chapterTitle storyTitle)
+                                , css
+                                    [ display block
+                                    , padding (px 5)
+                                    , cursor pointer
+                                    , color (rgb 255 255 255)
+                                    , textDecoration none
+                                    , hover
+                                        [ backgroundColor (rgb 99 167 245)
+                                        , borderRadius (px 3)
+                                        ]
+                                    ]
+                                ]
+                                [ text storyTitle ]
+                            ]
+
+                _ ->
+                    li []
+                        [ a
+                            [ Route.href (Route.Story chapterTitle storyTitle)
+                            , css
+                                [ display block
+                                , padding (px 5)
+                                , cursor pointer
+                                , color (rgb 255 255 255)
+                                , textDecoration none
+                                , hover
+                                    [ backgroundColor (rgb 99 167 245)
+                                    , borderRadius (px 3)
+                                    ]
+                                ]
+                            ]
+                            [ text storyTitle ]
+                        ]
     in
-    if Tuple.first chapter == "Nothing" then
-        "Home"
-
-    else
-        ui.name
-            |> (++) " :: "
-            |> (++) (Tuple.first story)
-            |> (++) " :: "
-            |> (++) (Tuple.first chapter)
+    li [] [ active ]
 
 
-menuStoriesView : String -> Story -> Html msg
-menuStoriesView chapterTitle ( storyTitle, _ ) =
-    li []
-        [ a
-            [ Route.href (Route.Story chapterTitle storyTitle)
-            , css
-                [ display block
-                , padding (px 5)
-                , cursor pointer
-                , color (rgb 255 255 255)
-                , textDecoration none
-                , hover
-                    [ backgroundColor (rgb 99 167 245)
-                    , borderRadius (px 3)
-                    ]
-                ]
-            ]
-            [ text storyTitle ]
-        ]
-
-
-menuChapterView : Chapter -> Html msg
-menuChapterView ( title, stories ) =
+sidebarChapterView : Bookmark -> Chapter -> Html msg
+sidebarChapterView bookmark (( title, stories ) as chapter) =
     li []
         [ span
             [ css
@@ -204,7 +287,7 @@ menuChapterView ( title, stories ) =
                 ]
             ]
             [ text title ]
-        , List.map (menuStoriesView title) stories
+        , List.map (sidebarStoryView bookmark chapter) stories
             |> ul
                 [ css
                     [ listStyle none
@@ -214,8 +297,8 @@ menuChapterView ( title, stories ) =
         ]
 
 
-menuChaptersView : List Chapter -> Html msg
-menuChaptersView chapters =
+sidebarView : Bookmark -> List Chapter -> Html msg
+sidebarView bookmark chapters =
     div
         [ css
             [ backgroundColor (rgb 47 51 56)
@@ -225,59 +308,22 @@ menuChaptersView chapters =
             , justifyContent center
             ]
         ]
-        [ List.map menuChapterView chapters
+        [ List.map (sidebarChapterView bookmark) chapters
             |> ul
                 [ css
-                    [ listStyle none, padding (px 10), Css.width (px 200), marginTop (px 30) ]
-                ]
-        ]
-
-
-uiItemView : Chapter -> String -> Ui -> Html msg
-uiItemView chapter story ui =
-    li
-        [ css
-            [ minWidth (px 80)
-            , first
-                [ margin4 zero zero zero (px 20) ]
-            ]
-        ]
-        [ a
-            [ Route.href (Route.Ui (Tuple.first chapter) story ui.name)
-            , css
-                [ textDecoration none
-                , backgroundColor (rgb 255 255 255)
-                , Css.width (px 80)
-                , Css.height (px 30)
-                , Css.property "display" "grid"
-                , Css.property "align-items" "center"
-                , textAlign center
-                , color (rgb 0 0 0)
-                , padding (px 10)
-                , borderBottom3 (px 3) solid (rgb 255 255 255)
-                , hover
-                    [ borderBottom3 (px 3) solid (rgba 99 167 245 0.8)
+                    [ listStyle none
+                    , padding (px 10)
+                    , Css.width (px 200)
+                    , marginTop (px 30)
                     ]
                 ]
-            ]
-            [ text ui.name ]
         ]
 
 
-contentView : Model -> HA.Html Msg
-contentView model =
-    let
-        selectedChapter =
-            selectChapter model.selectChapter model.chapters
-
-        ( storyName, uis ) =
-            selectStory model.selectStory (Tuple.second selectedChapter)
-
-        ui =
-            selectUi model.selectUi uis
-    in
+submenuView : Bookmark -> Chapter -> Story -> Html msg
+submenuView bookmark chapter story =
     div []
-        [ List.map (uiItemView selectedChapter storyName) uis
+        [ List.map (submenuUiView bookmark chapter story) (Tuple.second story)
             |> ul
                 [ css
                     [ backgroundColor (rgb 248 248 248)
@@ -293,18 +339,119 @@ contentView model =
                     , Css.width (pct 100)
                     ]
                 ]
-        , div
-            [ css
-                [ padding (px 20)
-                ]
-            ]
-            [ ui.view |> HA.map (\_ -> NoOp)
-            ]
         ]
 
 
+submenuUiView : Bookmark -> Chapter -> Story -> Ui -> Html msg
+submenuUiView bookmark chapter story ui =
+    let
+        active =
+            case bookmark of
+                UiBookmark chapterBookmark storyBookmark uiBookmark ->
+                    if uiBookmark.name == ui.name then
+                        span
+                            [ Route.href (Route.Ui (Tuple.first chapter) (Tuple.first story) ui.name)
+                            , css
+                                [ textDecoration none
+                                , backgroundColor (rgb 255 255 255)
+                                , Css.width (px 80)
+                                , Css.height (px 30)
+                                , Css.property "display" "grid"
+                                , Css.property "align-items" "center"
+                                , textAlign center
+                                , color (rgb 0 0 0)
+                                , padding (px 10)
+                                , borderBottom3 (px 3) solid (rgba 99 167 245 1)
+                                , hover
+                                    [ borderBottom3 (px 3) solid (rgba 99 167 245 0.8)
+                                    ]
+                                ]
+                            ]
+                            [ text ui.name ]
+
+                    else
+                        a
+                            [ Route.href (Route.Ui (Tuple.first chapter) (Tuple.first story) ui.name)
+                            , css
+                                [ textDecoration none
+                                , backgroundColor (rgb 255 255 255)
+                                , Css.width (px 80)
+                                , Css.height (px 30)
+                                , Css.property "display" "grid"
+                                , Css.property "align-items" "center"
+                                , textAlign center
+                                , color (rgb 0 0 0)
+                                , padding (px 10)
+                                , borderBottom3 (px 3) solid (rgb 255 255 255)
+                                , hover
+                                    [ borderBottom3 (px 3) solid (rgba 99 167 245 0.8)
+                                    ]
+                                ]
+                            ]
+                            [ text ui.name ]
+
+                _ ->
+                    a
+                        [ Route.href (Route.Ui (Tuple.first chapter) (Tuple.first story) ui.name)
+                        , css
+                            [ textDecoration none
+                            , backgroundColor (rgb 255 255 255)
+                            , Css.width (px 80)
+                            , Css.height (px 30)
+                            , Css.property "display" "grid"
+                            , Css.property "align-items" "center"
+                            , textAlign center
+                            , color (rgb 0 0 0)
+                            , padding (px 10)
+                            , borderBottom3 (px 3) solid (rgba 255 255 255 1)
+                            , hover
+                                [ borderBottom3 (px 3) solid (rgba 99 167 245 0.8)
+                                ]
+                            ]
+                        ]
+                        [ text ui.name ]
+    in
+    li
+        [ css
+            [ minWidth (px 80) ]
+        ]
+        [ active ]
+
+
+contentView : Model -> HA.Html Msg
+contentView ({ bookmark, chapters } as model) =
+    case bookmark of
+        None ->
+            div
+                [ css
+                    [ Css.property "display" "grid"
+                    , Css.property "justify-content" "center"
+                    , Css.property "align-content" "center"
+                    , fontSize (rem 2)
+                    , color (rgba 0 0 0 0.5)
+                    ]
+                ]
+                [ text "No bookmark" ]
+
+        StoryBookmark chapter story ->
+            submenuView bookmark chapter story
+
+        UiBookmark chapter story ui ->
+            div []
+                [ submenuView bookmark chapter story
+                , div [ css [ padding (px 20) ] ]
+                    [ ui.view |> HA.map (always NoOp)
+                    ]
+                ]
+
+        _ ->
+            span []
+                [ text "No Bookmark"
+                ]
+
+
 bodyView : Model -> List (H.Html Msg)
-bodyView model =
+bodyView ({ chapters, bookmark } as model) =
     [ global
         [ html
             [ margin zero
@@ -326,7 +473,7 @@ bodyView model =
             , Css.height (vh 100)
             ]
         ]
-        [ menuChaptersView model.chapters
+        [ sidebarView bookmark chapters
         , contentView model
         ]
         |> toUnstyled
@@ -345,6 +492,8 @@ book chapters =
         }
 
 
+{-| Example of code
+-}
 chapterList : List Chapter
 chapterList =
     [ ( "Forms"
@@ -354,8 +503,8 @@ chapterList =
             ]
           )
         , ( "Inputs"
-          , [ { name = "Default", view = Input.default [] [] }
-            , { name = "Small", view = Input.small [] [] }
+          , [ { name = "Default", view = div [ onClick NoOp ] [] }
+            , { name = "Small", view = div [] [] }
             ]
           )
         ]
