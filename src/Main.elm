@@ -9,6 +9,8 @@ import Html.Styled as HA exposing (..)
 import Html.Styled.Attributes exposing (..)
 import Html.Styled.Events exposing (onClick)
 import Route exposing (Route, href)
+import Theme.Sidebar as Sidebar
+import Theme.Submenu as Submenu
 import Url exposing (Url)
 
 
@@ -173,249 +175,62 @@ documentTitle ({ bookmark } as model) =
 
 sidebarStoryView : Bookmark -> Chapter -> Story -> Html msg
 sidebarStoryView bookmark (( chapterTitle, _ ) as chapter) (( storyTitle, _ ) as story) =
-    let
-        active =
-            case bookmark of
-                StoryBookmark chapterBookmark storyBookmark ->
-                    if storyTitle == Tuple.first storyBookmark then
-                        span
-                            [ css
-                                [ display block
-                                , padding (px 5)
-                                , cursor pointer
-                                , color (rgb 255 255 255)
-                                , textDecoration none
-                                , hover
-                                    [ backgroundColor (rgb 99 167 245)
-                                    , borderRadius (px 3)
-                                    ]
-                                , backgroundColor (rgba 99 167 245 0.8)
-                                , borderRadius (px 3)
-                                ]
-                            ]
-                            [ text storyTitle ]
+    case bookmark of
+        StoryBookmark chapterBookmark storyBookmark ->
+            if storyTitle == Tuple.first storyBookmark then
+                Sidebar.itemActive [] [ text storyTitle ]
 
-                    else
-                        li []
-                            [ a
-                                [ Route.href (Route.Story chapterTitle storyTitle)
-                                , css
-                                    [ display block
-                                    , padding (px 5)
-                                    , cursor pointer
-                                    , color (rgb 255 255 255)
-                                    , textDecoration none
-                                    , hover
-                                        [ backgroundColor (rgb 99 167 245)
-                                        , borderRadius (px 3)
-                                        ]
-                                    ]
-                                ]
-                                [ text storyTitle ]
-                            ]
+            else
+                Sidebar.item [ Route.href (Route.Story chapterTitle storyTitle) ] [ text storyTitle ]
 
-                UiBookmark _ storyBookmark ui ->
-                    if storyTitle == Tuple.first storyBookmark then
-                        span
-                            [ css
-                                [ display block
-                                , padding (px 5)
-                                , cursor pointer
-                                , color (rgb 255 255 255)
-                                , textDecoration none
-                                , hover
-                                    [ backgroundColor (rgb 99 167 245)
-                                    , borderRadius (px 3)
-                                    ]
-                                , backgroundColor (rgba 99 167 245 0.8)
-                                , borderRadius (px 3)
-                                ]
-                            ]
-                            [ text storyTitle ]
+        UiBookmark _ storyBookmark ui ->
+            if storyTitle == Tuple.first storyBookmark then
+                Sidebar.itemActive [] [ text storyTitle ]
 
-                    else
-                        li []
-                            [ a
-                                [ Route.href (Route.Story chapterTitle storyTitle)
-                                , css
-                                    [ display block
-                                    , padding (px 5)
-                                    , cursor pointer
-                                    , color (rgb 255 255 255)
-                                    , textDecoration none
-                                    , hover
-                                        [ backgroundColor (rgb 99 167 245)
-                                        , borderRadius (px 3)
-                                        ]
-                                    ]
-                                ]
-                                [ text storyTitle ]
-                            ]
+            else
+                Sidebar.item [ Route.href (Route.Story chapterTitle storyTitle) ] [ text storyTitle ]
 
-                _ ->
-                    li []
-                        [ a
-                            [ Route.href (Route.Story chapterTitle storyTitle)
-                            , css
-                                [ display block
-                                , padding (px 5)
-                                , cursor pointer
-                                , color (rgb 255 255 255)
-                                , textDecoration none
-                                , hover
-                                    [ backgroundColor (rgb 99 167 245)
-                                    , borderRadius (px 3)
-                                    ]
-                                ]
-                            ]
-                            [ text storyTitle ]
-                        ]
-    in
-    li [] [ active ]
+        _ ->
+            Sidebar.item [ Route.href (Route.Story chapterTitle storyTitle) ] [ text storyTitle ]
 
 
 sidebarChapterView : Bookmark -> Chapter -> Html msg
 sidebarChapterView bookmark (( title, stories ) as chapter) =
     li []
-        [ span
-            [ css
-                [ color (rgb 255 255 255)
-                , padding2 (px 10) (px 5)
-                , marginBottom (px 10)
-                , borderBottom2 (px 1) dotted
-                , display block
-                ]
-            ]
-            [ text title ]
+        [ Sidebar.title [] [ text title ]
         , List.map (sidebarStoryView bookmark chapter) stories
-            |> ul
-                [ css
-                    [ listStyle none
-                    , padding zero
-                    ]
-                ]
+            |> ul [ css [ listStyle none, padding zero ] ]
         ]
 
 
 sidebarView : Bookmark -> List Chapter -> Html msg
 sidebarView bookmark chapters =
-    div
-        [ css
-            [ backgroundColor (rgb 47 51 56)
-            , Css.width (pct 100)
-            , Css.height (pct 100)
-            , displayFlex
-            , justifyContent center
-            ]
-        ]
+    Sidebar.view []
         [ List.map (sidebarChapterView bookmark) chapters
-            |> ul
-                [ css
-                    [ listStyle none
-                    , padding (px 10)
-                    , Css.width (px 200)
-                    , marginTop (px 30)
-                    ]
-                ]
+            |> Sidebar.list []
         ]
 
 
 submenuView : Bookmark -> Chapter -> Story -> Html msg
 submenuView bookmark chapter story =
-    div []
-        [ List.map (submenuUiView bookmark chapter story) (Tuple.second story)
-            |> ul
-                [ css
-                    [ backgroundColor (rgb 248 248 248)
-                    , borderBottom3 (px 1) solid (rgb 181 181 181)
-                    , margin zero
-                    , Css.height (px 80)
-                    , Css.property "display" "grid"
-                    , Css.property "grid-auto-flow" "column"
-                    , Css.property "justify-content" "flex-start"
-                    , Css.property "align-items" "flex-end"
-                    , listStyle none
-                    , padding zero
-                    , Css.width (pct 100)
-                    ]
-                ]
-        ]
+    List.map (submenuUiView bookmark chapter story) (Tuple.second story)
+        |> Submenu.view []
 
 
 submenuUiView : Bookmark -> Chapter -> Story -> Ui -> Html msg
 submenuUiView bookmark chapter story ui =
-    let
-        active =
-            case bookmark of
-                UiBookmark chapterBookmark storyBookmark uiBookmark ->
-                    if uiBookmark.name == ui.name then
-                        span
-                            [ Route.href (Route.Ui (Tuple.first chapter) (Tuple.first story) ui.name)
-                            , css
-                                [ textDecoration none
-                                , backgroundColor (rgb 255 255 255)
-                                , Css.width (px 80)
-                                , Css.height (px 30)
-                                , Css.property "display" "grid"
-                                , Css.property "align-items" "center"
-                                , textAlign center
-                                , color (rgb 0 0 0)
-                                , padding (px 10)
-                                , borderBottom3 (px 3) solid (rgba 99 167 245 1)
-                                , hover
-                                    [ borderBottom3 (px 3) solid (rgba 99 167 245 0.8)
-                                    ]
-                                ]
-                            ]
-                            [ text ui.name ]
+    Submenu.item []
+        [ case bookmark of
+            UiBookmark chapterBookmark storyBookmark uiBookmark ->
+                if uiBookmark.name == ui.name then
+                    Submenu.linkActive [] [ text ui.name ]
 
-                    else
-                        a
-                            [ Route.href (Route.Ui (Tuple.first chapter) (Tuple.first story) ui.name)
-                            , css
-                                [ textDecoration none
-                                , backgroundColor (rgb 255 255 255)
-                                , Css.width (px 80)
-                                , Css.height (px 30)
-                                , Css.property "display" "grid"
-                                , Css.property "align-items" "center"
-                                , textAlign center
-                                , color (rgb 0 0 0)
-                                , padding (px 10)
-                                , borderBottom3 (px 3) solid (rgb 255 255 255)
-                                , hover
-                                    [ borderBottom3 (px 3) solid (rgba 99 167 245 0.8)
-                                    ]
-                                ]
-                            ]
-                            [ text ui.name ]
+                else
+                    Submenu.link [ Route.href (Route.Ui (Tuple.first chapter) (Tuple.first story) ui.name) ] [ text ui.name ]
 
-                _ ->
-                    a
-                        [ Route.href (Route.Ui (Tuple.first chapter) (Tuple.first story) ui.name)
-                        , css
-                            [ textDecoration none
-                            , backgroundColor (rgb 255 255 255)
-                            , Css.width (px 80)
-                            , Css.height (px 30)
-                            , Css.property "display" "grid"
-                            , Css.property "align-items" "center"
-                            , textAlign center
-                            , color (rgb 0 0 0)
-                            , padding (px 10)
-                            , borderBottom3 (px 3) solid (rgba 255 255 255 1)
-                            , hover
-                                [ borderBottom3 (px 3) solid (rgba 99 167 245 0.8)
-                                ]
-                            ]
-                        ]
-                        [ text ui.name ]
-    in
-    li
-        [ css
-            [ minWidth (px 80) ]
+            _ ->
+                Submenu.link [ Route.href (Route.Ui (Tuple.first chapter) (Tuple.first story) ui.name) ] [ text ui.name ]
         ]
-        [ active ]
 
 
 contentView : Model -> HA.Html Msg
@@ -446,8 +261,7 @@ contentView ({ bookmark, chapters } as model) =
 
         _ ->
             span []
-                [ text "No Bookmark"
-                ]
+                [ text "No Bookmark" ]
 
 
 bodyView : Model -> List (H.Html Msg)
