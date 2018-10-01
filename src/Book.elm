@@ -13,9 +13,9 @@ import Html.Styled as HA exposing (..)
 import Html.Styled.Attributes exposing (..)
 import Html.Styled.Events exposing (onClick)
 import Route.Route as Route exposing (Route, href)
-import Theme.Sidebar as Sidebar
-import Theme.Submenu as Submenu
 import Url exposing (Url)
+import Views.Sidebar as Sidebar
+import Views.Submenu as Submenu
 
 
 type alias Model msg =

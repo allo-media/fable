@@ -1,4 +1,4 @@
-module Theme.Submenu exposing (item, link, linkActive, view)
+module Views.Submenu exposing (item, link, linkActive, view)
 
 import Css exposing (..)
 import Html.Styled exposing (..)
