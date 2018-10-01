@@ -30,7 +30,7 @@ decodeChapterId string =
             ChapterId id
 
         Nothing ->
-            ChapterId "invalid"
+            ChapterId ""
 
 
 find : String -> List (Chapter msg) -> Maybe (Chapter msg)

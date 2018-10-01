@@ -20,7 +20,7 @@ decodeStoryId string =
             StoryId id
 
         Nothing ->
-            StoryId "invalid"
+            StoryId ""
 
 
 find : String -> List (Story msg) -> Maybe (Story msg)
