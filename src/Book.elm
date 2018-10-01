@@ -1,200 +1,123 @@
-module Book exposing (Chapter, Story, Ui, book)
+module Book exposing (Model, Msg(..), book)
 
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation exposing (Key, load, pushUrl)
 import Css exposing (..)
 import Css.Global exposing (body, global, html)
+import Data.Bookmark as Bookmark exposing (Bookmark(..))
+import Data.Chapter as Chapter exposing (Chapter, ChapterId(..), chapterIdToString, find)
+import Data.Story as Story exposing (Story, StoryId(..), find, storyIdToString)
+import Data.Ui as Ui exposing (Ui, UiId(..), find, uiIdToString)
 import Html as H
 import Html.Styled as HA exposing (..)
 import Html.Styled.Attributes exposing (..)
 import Html.Styled.Events exposing (onClick)
-import Route exposing (Route, href)
+import Route.Route as Route exposing (Route, href)
 import Theme.Sidebar as Sidebar
 import Theme.Submenu as Submenu
 import Url exposing (Url)
 
 
-
-{- Types -}
-
-
-type alias Chapter =
-    ( String, List Story )
-
-
-type alias Story =
-    ( String, List Ui )
-
-
-type alias Ui =
-    { name : String
-    , view : Html Msg
-    }
-
-
-type Bookmark
-    = ChapterBookmark Chapter
-    | StoryBookmark Chapter Story
-    | UiBookmark Chapter Story Ui
-    | None
-
-
-type alias Model =
+type alias Model msg =
     { navKey : Key
     , bookmark : Bookmark
-    , chapters : List Chapter
+    , chapters : List (Chapter msg)
     }
 
 
-type Msg
+type Msg msg
+    = ExternalMsg msg
+    | InternalMsg Internal
+
+
+type Internal
     = UrlChanged Url
     | UrlRequested Browser.UrlRequest
     | NoOp
 
 
-selectChapter : String -> List Chapter -> Maybe Chapter
-selectChapter id chapts =
-    List.filter (\( title, _ ) -> title == id) chapts
-        |> List.head
-
-
-selectStory : String -> Chapter -> Maybe Story
-selectStory id (( title, stories ) as chapter) =
-    List.filter (\story -> Tuple.first story == id) stories
-        |> List.head
-
-
-selectUi : String -> Story -> Maybe Ui
-selectUi name (( title, uis ) as storie) =
-    List.filter (\ui -> ui.name == name) uis
-        |> List.head
-
-
-init : List Chapter -> () -> Url -> Key -> ( Model, Cmd Msg )
-init chap _ url key =
+init : List (Chapter msg) -> () -> Url -> Key -> ( Model msg, Cmd (Msg msg) )
+init chapters _ url key =
     setRoute (Route.fromUrl url)
         { navKey = key
         , bookmark = None
-        , chapters = chap
+        , chapters = chapters
         }
 
 
-setUiBookmark : String -> String -> String -> Model -> Bookmark
-setUiBookmark chapterId storyId uiId ({ chapters } as model) =
-    case selectChapter chapterId chapters of
-        Nothing ->
-            None
-
-        Just chapter ->
-            case selectStory storyId chapter of
-                Nothing ->
-                    None
-
-                Just story ->
-                    selectUi uiId story
-                        |> Maybe.map (UiBookmark chapter story)
-                        |> Maybe.withDefault None
-
-
-setStoryBookmark : String -> String -> Model -> Bookmark
-setStoryBookmark chapterId storyId ({ chapters } as model) =
-    case selectChapter chapterId chapters of
-        Nothing ->
-            None
-
-        Just chapter ->
-            selectStory storyId chapter
-                |> Maybe.map (StoryBookmark chapter)
-                |> Maybe.withDefault None
-
-
-setRoute : Maybe Route -> Model -> ( Model, Cmd Msg )
-setRoute route ({ chapters } as model) =
+setRoute : Maybe Route -> Model msg -> ( Model msg, Cmd (Msg msg) )
+setRoute route model =
     case route of
         Nothing ->
             ( model, Cmd.none )
 
+        Just (Route.Chapter chapterId) ->
+            ( { model | bookmark = ChapterBookmark chapterId }, Cmd.none )
+
         Just (Route.Story chapterId storyId) ->
-            ( { model | bookmark = setStoryBookmark chapterId storyId model }
-            , Cmd.none
-            )
+            ( { model | bookmark = StoryBookmark chapterId storyId }, Cmd.none )
 
         Just (Route.Ui chapterId storyId uiId) ->
-            ( { model | bookmark = setUiBookmark chapterId storyId uiId model }
-            , Cmd.none
-            )
+            ( { model | bookmark = UiBookmark chapterId storyId uiId }, Cmd.none )
 
         Just Route.Home ->
             ( model, Cmd.none )
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg msg -> Model msg -> ( Model msg, Cmd (Msg msg) )
 update msg model =
     case msg of
-        UrlChanged url ->
-            setRoute (Route.fromUrl url) model
-
-        UrlRequested urlRequest ->
-            case urlRequest of
-                Browser.Internal url ->
-                    ( model, pushUrl model.navKey (Url.toString url) )
-
-                Browser.External url ->
-                    ( model, load url )
-
-        NoOp ->
+        ExternalMsg externalMsg ->
+            let
+                _ =
+                    Debug.log "msg" externalMsg
+            in
             ( model, Cmd.none )
 
+        InternalMsg internalMsg ->
+            case internalMsg of
+                UrlChanged url ->
+                    setRoute (Route.fromUrl url) model
 
-view : Model -> Document Msg
-view model =
-    { title = documentTitle model
-    , body = bodyView model
-    }
+                UrlRequested urlRequest ->
+                    case urlRequest of
+                        Browser.Internal url ->
+                            ( model, pushUrl model.navKey (Url.toString url) )
 
+                        Browser.External url ->
+                            ( model, load url )
 
-documentTitle : Model -> String
-documentTitle ({ bookmark } as model) =
-    case bookmark of
-        None ->
-            ""
-
-        StoryBookmark chapter story ->
-            Tuple.first chapter ++ " :: " ++ Tuple.first story
-
-        UiBookmark chapter story ui ->
-            ui.name
-                |> (++) " :: "
-                |> (++) (Tuple.first story)
-                |> (++) " :: "
-                |> (++) (Tuple.first chapter)
-
-        _ ->
-            ""
+                NoOp ->
+                    ( model, Cmd.none )
 
 
-sidebarStoryView : Bookmark -> Chapter -> Story -> Html msg
+view : Model msg -> Document (Msg msg)
+view ({ bookmark } as model) =
+    { title = Bookmark.title bookmark, body = bodyView model }
+
+
+sidebarStoryView : Bookmark -> Chapter msg -> Story msg -> Html (Msg msg)
 sidebarStoryView bookmark (( chapterTitle, _ ) as chapter) (( storyTitle, _ ) as story) =
     case bookmark of
-        StoryBookmark chapterBookmark storyBookmark ->
-            if storyTitle == Tuple.first storyBookmark then
+        StoryBookmark chapterId storyId ->
+            if storyTitle == storyIdToString storyId then
                 Sidebar.itemActive [] [ text storyTitle ]
 
             else
-                Sidebar.item [ Route.href (Route.Story chapterTitle storyTitle) ] [ text storyTitle ]
+                Sidebar.item [ Route.href (Route.Story (ChapterId chapterTitle) (StoryId storyTitle)) ] [ text storyTitle ]
 
-        UiBookmark _ storyBookmark ui ->
-            if storyTitle == Tuple.first storyBookmark then
+        UiBookmark chapterId storyId uiId ->
+            if storyTitle == storyIdToString storyId then
                 Sidebar.itemActive [] [ text storyTitle ]
 
             else
-                Sidebar.item [ Route.href (Route.Story chapterTitle storyTitle) ] [ text storyTitle ]
+                Sidebar.item [ Route.href (Route.Story (ChapterId chapterTitle) (StoryId storyTitle)) ] [ text storyTitle ]
 
         _ ->
-            Sidebar.item [ Route.href (Route.Story chapterTitle storyTitle) ] [ text storyTitle ]
+            Sidebar.item [ Route.href (Route.Story (ChapterId chapterTitle) (StoryId storyTitle)) ] [ text storyTitle ]
 
 
-sidebarChapterView : Bookmark -> Chapter -> Html msg
+sidebarChapterView : Bookmark -> Chapter msg -> Html (Msg msg)
 sidebarChapterView bookmark (( title, stories ) as chapter) =
     li []
         [ Sidebar.title [] [ text title ]
@@ -203,7 +126,7 @@ sidebarChapterView bookmark (( title, stories ) as chapter) =
         ]
 
 
-sidebarView : Bookmark -> List Chapter -> Html msg
+sidebarView : Bookmark -> List (Chapter msg) -> Html (Msg msg)
 sidebarView bookmark chapters =
     Sidebar.view []
         [ List.map (sidebarChapterView bookmark) chapters
@@ -211,29 +134,29 @@ sidebarView bookmark chapters =
         ]
 
 
-submenuView : Bookmark -> Chapter -> Story -> Html msg
+submenuView : Bookmark -> Chapter msg -> Story msg -> Html (Msg msg)
 submenuView bookmark chapter story =
     List.map (submenuUiView bookmark chapter story) (Tuple.second story)
         |> Submenu.view []
 
 
-submenuUiView : Bookmark -> Chapter -> Story -> Ui -> Html msg
+submenuUiView : Bookmark -> Chapter msg -> Story msg -> Ui msg -> Html (Msg msg)
 submenuUiView bookmark chapter story ui =
     Submenu.item []
         [ case bookmark of
-            UiBookmark chapterBookmark storyBookmark uiBookmark ->
-                if uiBookmark.name == ui.name then
+            UiBookmark chapterId storyId uiId ->
+                if uiIdToString uiId == ui.name then
                     Submenu.linkActive [] [ text ui.name ]
 
                 else
-                    Submenu.link [ Route.href (Route.Ui (Tuple.first chapter) (Tuple.first story) ui.name) ] [ text ui.name ]
+                    Submenu.link [ Route.href (Route.Ui chapterId storyId uiId) ] [ text ui.name ]
 
             _ ->
-                Submenu.link [ Route.href (Route.Ui (Tuple.first chapter) (Tuple.first story) ui.name) ] [ text ui.name ]
+                Submenu.link [ Route.href (Route.Ui (ChapterId (Tuple.first chapter)) (StoryId (Tuple.first story)) (UiId ui.name)) ] [ text ui.name ]
         ]
 
 
-contentView : Model -> HA.Html Msg
+contentView : Model msg -> HA.Html (Msg msg)
 contentView ({ bookmark, chapters } as model) =
     case bookmark of
         None ->
@@ -248,23 +171,49 @@ contentView ({ bookmark, chapters } as model) =
                 ]
                 [ text "No bookmark" ]
 
-        StoryBookmark chapter story ->
-            submenuView bookmark chapter story
+        StoryBookmark chapterId storyId ->
+            case Chapter.find (chapterIdToString chapterId) chapters of
+                Just chapter ->
+                    case Story.find (storyIdToString storyId) (Tuple.second chapter) of
+                        Just story ->
+                            submenuView bookmark chapter story
 
-        UiBookmark chapter story ui ->
-            div []
-                [ submenuView bookmark chapter story
-                , div [ css [ padding (px 20) ] ]
-                    [ ui.view |> HA.map (always NoOp)
-                    ]
-                ]
+                        Nothing ->
+                            div [] [ text "none" ]
+
+                Nothing ->
+                    div [] [ text "none" ]
+
+        UiBookmark chapterId storyId uiId ->
+            case Chapter.find (chapterIdToString chapterId) chapters of
+                Just chapter ->
+                    case Story.find (storyIdToString storyId) (Tuple.second chapter) of
+                        Just story ->
+                            case Ui.find (uiIdToString uiId) (Tuple.second story) of
+                                Just ui ->
+                                    div []
+                                        [ submenuView bookmark chapter story
+                                        , div [ css [ padding (px 20) ] ]
+                                            [ ui.view
+                                                |> HA.map ExternalMsg
+                                            ]
+                                        ]
+
+                                Nothing ->
+                                    div [] [ text "none" ]
+
+                        Nothing ->
+                            div [] [ text "none" ]
+
+                Nothing ->
+                    div [] [ text "none" ]
 
         _ ->
             span []
-                [ text "No Bookmark" ]
+                [ text "BAH ALORS" ]
 
 
-bodyView : Model -> List (H.Html Msg)
+bodyView : Model msg -> List (H.Html (Msg msg))
 bodyView ({ chapters, bookmark } as model) =
     [ global
         [ html
@@ -294,43 +243,13 @@ bodyView ({ chapters, bookmark } as model) =
     ]
 
 
-book : List Chapter -> Program () Model Msg
+book : List (Chapter msg) -> Program () (Model msg) (Msg msg)
 book chapters =
     Browser.application
         { init = init chapters
-        , onUrlChange = UrlChanged
-        , onUrlRequest = UrlRequested
+        , onUrlChange = \url -> InternalMsg (UrlChanged url)
+        , onUrlRequest = \urlRequest -> InternalMsg (UrlRequested urlRequest)
         , subscriptions = always Sub.none
         , update = update
         , view = view
         }
-
-
-{-| Example of code
--}
-chapterList : List Chapter
-chapterList =
-    [ ( "Forms"
-      , [ ( "Buttons"
-          , [ { name = "Button", view = buttonView "button" }
-            , { name = "Button2", view = buttonView "button 2" }
-            ]
-          )
-        , ( "Inputs"
-          , [ { name = "Default", view = div [ onClick NoOp ] [] }
-            , { name = "Small", view = div [] [] }
-            ]
-          )
-        ]
-      )
-    ]
-
-
-buttonView : String -> Html msg
-buttonView string =
-    button [] [ text string ]
-
-
-main : Program () Model Msg
-main =
-    book chapterList
