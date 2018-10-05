@@ -1,8 +1,8 @@
 module Route.Route exposing (Route(..), fromUrl, href)
 
-import Data.Chapter exposing (ChapterId, chapterIdParser, chapterIdToString)
-import Data.Story exposing (StoryId, storyIdParser, storyIdToString)
-import Data.Ui exposing (UiId, uiIdParser, uiIdToString)
+import Data.Chapter as Chapter exposing (ChapterId)
+import Data.Story as Story exposing (StoryId)
+import Data.Ui as Ui exposing (UiId)
 import Html.Styled exposing (Attribute)
 import Html.Styled.Attributes as Attributes
 import Url exposing (Url, percentEncode)
@@ -20,9 +20,9 @@ parser : Parser (Route -> a) a
 parser =
     oneOf
         [ map Home top
-        , map Chapter (s "chapters" </> chapterIdParser)
-        , map Story (s "chapters" </> chapterIdParser </> s "story" </> storyIdParser)
-        , map Ui (s "chapters" </> chapterIdParser </> s "story" </> storyIdParser </> s "ui" </> uiIdParser)
+        , map Chapter (s "chapters" </> Chapter.idParser)
+        , map Story (s "chapters" </> Chapter.idParser </> s "story" </> Story.idParser)
+        , map Ui (s "chapters" </> Chapter.idParser </> s "story" </> Story.idParser </> s "ui" </> Ui.idParser)
         ]
 
 
@@ -46,22 +46,22 @@ routeToString route =
                     []
 
                 Chapter chapterId ->
-                    [ "chapters", chapterId |> chapterIdToString |> percentEncode ]
+                    [ "chapters", chapterId |> Chapter.idToString |> percentEncode ]
 
                 Story chapterId storyId ->
                     [ "chapters"
-                    , chapterId |> chapterIdToString |> percentEncode
+                    , chapterId |> Chapter.idToString |> percentEncode
                     , "story"
-                    , storyId |> storyIdToString |> percentEncode
+                    , storyId |> Story.idToString |> percentEncode
                     ]
 
                 Ui chapterId storyId uiId ->
                     [ "chapters"
-                    , chapterId |> chapterIdToString |> percentEncode
+                    , chapterId |> Chapter.idToString |> percentEncode
                     , "story"
-                    , storyId |> storyIdToString |> percentEncode
+                    , storyId |> Story.idToString |> percentEncode
                     , "ui"
-                    , uiId |> uiIdToString |> percentEncode
+                    , uiId |> Ui.idToString |> percentEncode
                     ]
     in
     "#/" ++ String.join "/" pieces

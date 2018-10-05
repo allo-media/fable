@@ -1,4 +1,4 @@
-module Data.Ui exposing (Ui, UiId(..), find, uiIdParser, uiIdToString)
+module Data.Ui exposing (Ui, UiId(..), find, idParser, idToString)
 
 import Html.Styled exposing (Html)
 import Url exposing (percentDecode)
@@ -6,7 +6,7 @@ import Url.Parser exposing (Parser, custom)
 
 
 type alias Ui msg =
-    { name : String
+    { id : UiId
     , view : Html msg
     }
 
@@ -15,27 +15,27 @@ type UiId
     = UiId String
 
 
-decodeUiId : String -> UiId
-decodeUiId string =
+decodeId : String -> UiId
+decodeId string =
     case percentDecode string of
         Just id ->
             UiId id
 
         Nothing ->
-            UiId ""
+            UiId string
 
 
-find : String -> List (Ui msg) -> Maybe (Ui msg)
-find name uis =
-    List.filter (\ui -> ui.name == name) uis
+find : UiId -> List (Ui msg) -> Maybe (Ui msg)
+find id uis =
+    List.filter (\ui -> ui.id == id) uis
         |> List.head
 
 
-uiIdParser : Parser (UiId -> a) a
-uiIdParser =
-    custom "UI_ID" (Just << decodeUiId)
+idParser : Parser (UiId -> a) a
+idParser =
+    custom "UI_ID" (Just << decodeId)
 
 
-uiIdToString : UiId -> String
-uiIdToString (UiId id) =
+idToString : UiId -> String
+idToString (UiId id) =
     id

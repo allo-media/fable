@@ -2,10 +2,10 @@ module Views.Bookmark exposing (none, view)
 
 import Css exposing (..)
 import Data.Bookmark exposing (Bookmark(..))
-import Data.Chapter as Chapter exposing (Chapter, chapterIdToString)
+import Data.Chapter as Chapter exposing (Chapter)
 import Data.Msg exposing (Msg(..))
-import Data.Story as Story exposing (Story, storyIdToString)
-import Data.Ui as Ui exposing (find, uiIdToString)
+import Data.Story as Story exposing (Story)
+import Data.Ui as Ui exposing (find)
 import Html.Styled as Html exposing (..)
 import Html.Styled.Attributes exposing (..)
 import Views.Sidebar as Sidebar
@@ -13,15 +13,18 @@ import Views.Submenu as Submenu
 import Views.Theme exposing (Element)
 
 
-none : Element msg
+none : Html msg
 none =
-    styled div
-        [ Css.property "display" "grid"
-        , Css.property "justify-content" "center"
-        , Css.property "align-content" "center"
-        , fontSize (rem 2)
-        , color (rgba 0 0 0 0.5)
+    div
+        [ css
+            [ Css.property "display" "grid"
+            , Css.property "justify-content" "center"
+            , Css.property "align-content" "center"
+            , fontSize (rem 2)
+            , color (rgba 0 0 0 0.5)
+            ]
         ]
+        [ text "None" ]
 
 
 layout : Element msg
@@ -37,12 +40,13 @@ view : Bookmark -> List (Chapter msg) -> Html (Msg msg)
 view bookmark chapters =
     case bookmark of
         ChapterBookmark chapterId ->
+            {- -}
             div [] []
 
         StoryBookmark chapterId storyId ->
-            case Chapter.find (chapterIdToString chapterId) chapters of
+            case Chapter.find chapterId chapters of
                 Just chapter ->
-                    case Story.find (storyIdToString storyId) (Tuple.second chapter) of
+                    case Story.find storyId (Tuple.second chapter) of
                         Just story ->
                             layout []
                                 [ Sidebar.view bookmark chapters
@@ -52,21 +56,21 @@ view bookmark chapters =
                         Nothing ->
                             layout []
                                 [ Sidebar.view bookmark chapters
-                                , none [] [ text "none" ]
+                                , none
                                 ]
 
                 Nothing ->
                     layout []
                         [ Sidebar.view bookmark chapters
-                        , none [] [ text "none" ]
+                        , none
                         ]
 
         UiBookmark chapterId storyId uiId ->
-            case Chapter.find (chapterIdToString chapterId) chapters of
+            case Chapter.find chapterId chapters of
                 Just chapter ->
-                    case Story.find (storyIdToString storyId) (Tuple.second chapter) of
+                    case Story.find storyId (Tuple.second chapter) of
                         Just story ->
-                            case Ui.find (uiIdToString uiId) (Tuple.second story) of
+                            case Ui.find uiId (Tuple.second story) of
                                 Just ui ->
                                     layout []
                                         [ Sidebar.view bookmark chapters
@@ -82,19 +86,19 @@ view bookmark chapters =
                                 Nothing ->
                                     layout []
                                         [ Sidebar.view bookmark chapters
-                                        , none [] [ text "none" ]
+                                        , none
                                         ]
 
                         Nothing ->
                             layout []
                                 [ Sidebar.view bookmark chapters
-                                , none [] [ text "none" ]
+                                , none
                                 ]
 
                 Nothing ->
                     layout []
                         [ Sidebar.view bookmark chapters
-                        , none [] [ text "none" ]
+                        , none
                         ]
 
         None ->

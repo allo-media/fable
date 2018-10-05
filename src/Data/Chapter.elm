@@ -1,4 +1,4 @@
-module Data.Chapter exposing (Chapter, ChapterId(..), chapterIdParser, chapterIdToString, find)
+module Data.Chapter exposing (Chapter, ChapterId(..), find, idParser, idToString)
 
 import Data.Story exposing (Story)
 import Url exposing (percentDecode)
@@ -6,34 +6,34 @@ import Url.Parser exposing (Parser, custom)
 
 
 type alias Chapter msg =
-    ( String, List (Story msg) )
+    ( ChapterId, List (Story msg) )
 
 
 type ChapterId
     = ChapterId String
 
 
-chapterIdParser : Parser (ChapterId -> a) a
-chapterIdParser =
-    custom "CHAPTER_ID" (Just << decodeChapterId)
+idParser : Parser (ChapterId -> a) a
+idParser =
+    custom "CHAPTER_ID" (Just << decodeId)
 
 
-chapterIdToString : ChapterId -> String
-chapterIdToString (ChapterId id) =
+idToString : ChapterId -> String
+idToString (ChapterId id) =
     id
 
 
-decodeChapterId : String -> ChapterId
-decodeChapterId string =
+decodeId : String -> ChapterId
+decodeId string =
     case percentDecode string of
         Just id ->
             ChapterId id
 
         Nothing ->
-            ChapterId ""
+            ChapterId string
 
 
-find : String -> List (Chapter msg) -> Maybe (Chapter msg)
+find : ChapterId -> List (Chapter msg) -> Maybe (Chapter msg)
 find id chapts =
-    List.filter (\( title, _ ) -> title == id) chapts
+    List.filter (\( id_, _ ) -> id_ == id) chapts
         |> List.head

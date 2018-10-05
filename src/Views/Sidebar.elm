@@ -2,9 +2,9 @@ module Views.Sidebar exposing (item, itemActive, list, title, view)
 
 import Css exposing (..)
 import Data.Bookmark exposing (Bookmark(..))
-import Data.Chapter exposing (Chapter, ChapterId(..))
+import Data.Chapter as Chapter exposing (Chapter, ChapterId(..))
 import Data.Msg exposing (Msg(..))
-import Data.Story exposing (..)
+import Data.Story as Story exposing (..)
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (..)
 import Route.Route as Route exposing (Route(..))
@@ -63,30 +63,30 @@ list =
 
 
 story : Bookmark -> Chapter msg -> Story msg -> Html (Msg msg)
-story bookmark (( chapterTitle, _ ) as chapter_) (( storyTitle, _ ) as story_) =
+story bookmark (( chapterId, _ ) as chapter_) (( storyId, _ ) as story_) =
     case bookmark of
-        StoryBookmark chapterId storyId ->
-            if storyTitle == storyIdToString storyId then
-                itemActive [] [ text storyTitle ]
+        StoryBookmark chapterId_ storyId_ ->
+            if storyId == storyId_ then
+                itemActive [] [ text (Story.idToString storyId) ]
 
             else
-                item [ Route.href (Route.Story (ChapterId chapterTitle) (StoryId storyTitle)) ] [ text storyTitle ]
+                item [ Route.href (Route.Story chapterId storyId) ] [ text (Story.idToString storyId) ]
 
-        UiBookmark chapterId storyId uiId ->
-            if storyTitle == storyIdToString storyId then
-                itemActive [] [ text storyTitle ]
+        UiBookmark chapterId_ storyId_ uiId_ ->
+            if storyId_ == storyId then
+                itemActive [] [ text (Story.idToString storyId) ]
 
             else
-                item [ Route.href (Route.Story (ChapterId chapterTitle) (StoryId storyTitle)) ] [ text storyTitle ]
+                item [ Route.href (Route.Story chapterId storyId) ] [ text (Story.idToString storyId) ]
 
         _ ->
-            item [ Route.href (Route.Story (ChapterId chapterTitle) (StoryId storyTitle)) ] [ text storyTitle ]
+            item [ Route.href (Route.Story chapterId storyId) ] [ text (Story.idToString storyId) ]
 
 
 chapter : Bookmark -> Chapter msg -> Html (Msg msg)
-chapter bookmark (( chapterTitle, stories ) as chapter_) =
+chapter bookmark (( chapterId, stories ) as chapter_) =
     li []
-        [ title [] [ text chapterTitle ]
+        [ title [] [ text (Chapter.idToString chapterId) ]
         , List.map (story bookmark chapter_) stories
             |> ul [ css [ listStyle none, padding zero ] ]
         ]

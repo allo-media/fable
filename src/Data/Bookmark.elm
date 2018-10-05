@@ -1,8 +1,8 @@
 module Data.Bookmark exposing (Bookmark(..), title)
 
-import Data.Chapter exposing (ChapterId, chapterIdToString)
-import Data.Story exposing (StoryId, storyIdToString)
-import Data.Ui exposing (UiId, uiIdToString)
+import Data.Chapter as Chapter exposing (ChapterId)
+import Data.Story as Story exposing (StoryId)
+import Data.Ui as Ui exposing (UiId)
 
 
 type Bookmark
@@ -16,17 +16,17 @@ title : Bookmark -> String
 title bookmark =
     case bookmark of
         ChapterBookmark chapterId ->
-            chapterIdToString chapterId
+            Chapter.idToString chapterId
 
         StoryBookmark chapterId storyId ->
-            chapterIdToString chapterId ++ " :: " ++ storyIdToString storyId
+            Chapter.idToString chapterId ++ " :: " ++ Story.idToString storyId
 
         UiBookmark chapterId storyId uiId ->
-            uiIdToString uiId
+            Ui.idToString uiId
                 |> (++) " :: "
-                |> (++) (storyIdToString storyId)
+                |> (++) (Story.idToString storyId)
                 |> (++) " :: "
-                |> (++) (chapterIdToString chapterId)
+                |> (++) (Chapter.idToString chapterId)
 
         None ->
             ""

@@ -2,8 +2,10 @@ module Main exposing (main)
 
 import Book exposing (Model, book)
 import Css exposing (..)
-import Data.Chapter exposing (Chapter)
+import Data.Chapter exposing (Chapter, ChapterId(..))
 import Data.Msg exposing (Msg(..))
+import Data.Story exposing (StoryId(..))
+import Data.Ui exposing (Ui, UiId(..))
 import Html.Styled exposing (Html, button, input)
 import Html.Styled.Attributes exposing (css)
 import Html.Styled.Events exposing (..)
@@ -22,9 +24,9 @@ inputView =
 
 chapterList : List (Chapter MsgEx)
 chapterList =
-    [ ( "Chapter éeze1"
-      , [ ( "Story 1 ", [ { name = "test", view = inputView } ] )
-        , ( "Story 32 %", [ { name = "test", view = button [ onClick Yo ] [] } ] )
+    [ ( ChapterId "Chapter éeze1"
+      , [ ( StoryId "Story 1 ", [ { id = UiId "test", view = inputView } ] )
+        , ( StoryId "Story 32 %", [ { id = UiId "test", view = button [ onClick Yo ] [] } ] )
         ]
       )
     ]

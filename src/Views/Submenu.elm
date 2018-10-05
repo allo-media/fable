@@ -5,7 +5,7 @@ import Data.Bookmark exposing (Bookmark(..))
 import Data.Chapter exposing (Chapter, ChapterId(..))
 import Data.Msg exposing (Msg(..))
 import Data.Story exposing (Story, StoryId(..))
-import Data.Ui exposing (Ui, UiId(..), uiIdToString)
+import Data.Ui as Ui exposing (Ui, UiId(..))
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (css)
 import Route.Route as Route
@@ -72,14 +72,14 @@ ui bookmark chapter story ui_ =
     item []
         [ case bookmark of
             UiBookmark chapterId storyId uiId ->
-                if uiIdToString uiId == ui_.name then
-                    linkActive [] [ text ui_.name ]
+                if uiId == ui_.id then
+                    linkActive [] [ text (Ui.idToString ui_.id) ]
 
                 else
-                    link [ Route.href (Route.Ui chapterId storyId uiId) ] [ text ui_.name ]
+                    link [ Route.href (Route.Ui chapterId storyId uiId) ] [ text (Ui.idToString ui_.id) ]
 
             _ ->
-                link [ Route.href (Route.Ui (ChapterId (Tuple.first chapter)) (StoryId (Tuple.first story)) (UiId ui_.name)) ] [ text ui_.name ]
+                link [ Route.href (Route.Ui (Tuple.first chapter) (Tuple.first story) ui_.id) ] [ text (Ui.idToString ui_.id) ]
         ]
 
 

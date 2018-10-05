@@ -10,20 +10,19 @@ import Html.Styled.Attributes exposing (css)
 
 view : HS.Html (Msg msg) -> List (Html (Msg msg))
 view content =
-    [ global
-        [ html
-            [ margin zero
-            , padding zero
+    List.map toUnstyled
+        [ global
+            [ html
+                [ margin zero
+                , padding zero
+                ]
+            , body
+                [ margin zero
+                , padding zero
+                , fontFamilies [ "Montserrat", .value serif ]
+                , fontSize (px 16)
+                , boxSizing borderBox
+                ]
             ]
-        , body
-            [ margin zero
-            , padding zero
-            , fontFamilies [ "Montserrat", .value serif ]
-            , fontSize (px 16)
-            , boxSizing borderBox
-            ]
+        , content
         ]
-        |> toUnstyled
-    , content
-        |> toUnstyled
-    ]

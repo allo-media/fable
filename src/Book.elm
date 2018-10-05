@@ -1,6 +1,6 @@
 module Book exposing (Model, book)
 
-{-| With Fable you can create book of your view function.
+{-| With Fable ....
 
 
 # Definitions
@@ -14,12 +14,12 @@ import Browser.Navigation exposing (Key, load, pushUrl)
 import Css exposing (..)
 import Css.Global exposing (body, global, html)
 import Data.Bookmark as BookmarkData exposing (Bookmark(..))
-import Data.Chapter as Chapter exposing (Chapter, ChapterId(..), chapterIdToString, find)
+import Data.Chapter as Chapter exposing (Chapter, ChapterId(..), find)
 import Data.Msg exposing (Internal(..), Msg(..))
-import Data.Story as Story exposing (Story, StoryId(..), find, storyIdToString)
-import Data.Ui as Ui exposing (Ui, UiId(..), find, uiIdToString)
+import Data.Story as Story exposing (Story, StoryId(..), find)
+import Data.Ui as Ui exposing (Ui, UiId(..), find)
 import Html as H
-import Html.Styled as HA exposing (..)
+import Html.Styled as HS exposing (..)
 import Html.Styled.Attributes exposing (..)
 import Route.Route as Route exposing (Route, href)
 import Url exposing (Url)
@@ -64,7 +64,7 @@ setRoute route model =
             ( model, Cmd.none )
 
 
-update : Msg msg -> Model msg -> ( Model msg, Cmd (Msg msg) )
+update : Msg ext -> Model ext -> ( Model ext, Cmd (Msg ext) )
 update msg model =
     case msg of
         ExternalMsg externalMsg ->
@@ -104,8 +104,8 @@ book : List (Chapter msg) -> Program () (Model msg) (Msg msg)
 book chapters =
     Browser.application
         { init = init chapters
-        , onUrlChange = \url -> InternalMsg (UrlChanged url)
-        , onUrlRequest = \urlRequest -> InternalMsg (UrlRequested urlRequest)
+        , onUrlChange = InternalMsg << UrlChanged
+        , onUrlRequest = InternalMsg << UrlRequested
         , subscriptions = always Sub.none
         , update = update
         , view = view
