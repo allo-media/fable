@@ -1,4 +1,4 @@
-module Theme exposing (Element)
+module Views.Theme exposing (Element)
 
 import Html.Styled exposing (Attribute, Html)
 

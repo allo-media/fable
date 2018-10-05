@@ -1,16 +1,15 @@
-module Views.App exposing (layout)
+module Views.App exposing (view)
 
 import Css exposing (..)
 import Css.Global exposing (..)
-import Data.Bookmark exposing (Bookmark(..))
-import Data.Chapter exposing (Chapter)
+import Data.Msg exposing (Msg)
 import Html exposing (Html)
 import Html.Styled as HS exposing (div, text, toUnstyled)
 import Html.Styled.Attributes exposing (css)
 
 
-layout : HS.Html msg -> List (Html msg)
-layout content =
+view : HS.Html (Msg msg) -> List (Html (Msg msg))
+view content =
     [ global
         [ html
             [ margin zero
@@ -25,13 +24,6 @@ layout content =
             ]
         ]
         |> toUnstyled
-    , div
-        [ css
-            [ Css.property "display" "grid"
-            , Css.property "grid-template-columns" "auto 1fr"
-            , Css.height (vh 100)
-            ]
-        ]
-        [ content ]
+    , content
         |> toUnstyled
     ]
