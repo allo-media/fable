@@ -1,4 +1,4 @@
-module Book exposing (Book, app, chapter, story, ui)
+module Fable exposing (Book, app, chapter, story, ui)
 
 {-| With Fable ....
 
@@ -11,16 +11,13 @@ module Book exposing (Book, app, chapter, story, ui)
 
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation exposing (Key, load, pushUrl)
-import Css exposing (..)
-import Css.Global exposing (body, global, html)
 import Data.Bookmark as BookmarkData exposing (Bookmark(..))
-import Data.Chapter as Chapter exposing (Chapter, ChapterId(..), find)
+import Data.Chapter as Chapter exposing (Chapter, ChapterId(..))
 import Data.Msg exposing (Internal(..), Msg(..))
-import Data.Story as Story exposing (Story, StoryId(..), find)
-import Data.Ui as Ui exposing (Ui, UiId(..), find)
+import Data.Story as Story exposing (Story, StoryId(..))
+import Data.Ui as Ui exposing (Ui, UiId(..))
 import Html as H
-import Html.Styled as HS exposing (..)
-import Html.Styled.Attributes exposing (..)
+import Html.Styled as HS
 import Route.Route as Route exposing (Route, href)
 import Url exposing (Url)
 import Views.App as App
@@ -29,6 +26,30 @@ import Views.Sidebar as Sidebar
 import Views.Submenu as Submenu
 
 
+{-| -}
+type alias Book msg =
+    Program () (Model msg) (Msg msg)
+
+
+{-| -}
+chapter : String -> List (Story msg) -> Chapter msg
+chapter string stories =
+    ( ChapterId string, stories )
+
+
+{-| -}
+story : String -> List (Ui msg) -> Story msg
+story string uis =
+    ( StoryId string, uis )
+
+
+{-| -}
+ui : String -> HS.Html msg -> Ui msg
+ui string html =
+    Ui (UiId string) html
+
+
+{-| -}
 type alias Model msg =
     { navKey : Key
     , bookmark : Bookmark
@@ -36,25 +57,7 @@ type alias Model msg =
     }
 
 
-type alias Book msg =
-    Program () (Model msg) (Msg msg)
-
-
-chapter : String -> List (Story msg) -> Chapter msg
-chapter string stories =
-    ( ChapterId string, stories )
-
-
-story : String -> List (Ui msg) -> Story msg
-story string uis =
-    ( StoryId string, uis )
-
-
-ui : String -> Html msg -> Ui msg
-ui string html =
-    Ui (UiId string) html
-
-
+{-| -}
 init : List (Chapter msg) -> () -> Url -> Key -> ( Model msg, Cmd (Msg msg) )
 init chapters _ url key =
     setRoute (Route.fromUrl url)
@@ -64,6 +67,7 @@ init chapters _ url key =
         }
 
 
+{-| -}
 setRoute : Maybe Route -> Model msg -> ( Model msg, Cmd (Msg msg) )
 setRoute route model =
     case route of
@@ -83,7 +87,8 @@ setRoute route model =
             ( model, Cmd.none )
 
 
-update : Msg ext -> Model ext -> ( Model ext, Cmd (Msg ext) )
+{-| -}
+update : Msg msg -> Model msg -> ( Model msg, Cmd (Msg msg) )
 update msg model =
     case msg of
         ExternalMsg externalMsg ->
@@ -106,6 +111,7 @@ update msg model =
                     ( model, Cmd.none )
 
 
+{-| -}
 view : Model msg -> Document (Msg msg)
 view ({ bookmark } as model) =
     { title = BookmarkData.title bookmark
@@ -113,6 +119,7 @@ view ({ bookmark } as model) =
     }
 
 
+{-| -}
 body : Model msg -> List (H.Html (Msg msg))
 body ({ chapters, bookmark } as model) =
     App.view (Bookmark.view bookmark chapters)

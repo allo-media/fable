@@ -76,7 +76,7 @@ ui bookmark chapter story ui_ =
                     linkActive [] [ text (Ui.idToString ui_.id) ]
 
                 else
-                    link [ Route.href (Route.Ui chapterId storyId uiId) ] [ text (Ui.idToString ui_.id) ]
+                    link [ Route.href (Route.Ui chapterId storyId ui_.id) ] [ text (Ui.idToString ui_.id) ]
 
             _ ->
                 link [ Route.href (Route.Ui (Tuple.first chapter) (Tuple.first story) ui_.id) ] [ text (Ui.idToString ui_.id) ]

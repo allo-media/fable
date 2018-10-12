@@ -1,8 +1,8 @@
 module Main exposing (main)
 
-import Book as Book exposing (Book)
 import Css exposing (..)
-import Html.Styled exposing (Html, button, input)
+import Fable as Fable exposing (Book)
+import Html.Styled exposing (Html, button, input, text)
 import Html.Styled.Attributes exposing (css)
 import Html.Styled.Events exposing (..)
 
@@ -14,29 +14,29 @@ type Msg
 
 inputView : Html Msg
 inputView =
-    input [ css [ padding2 (px 10) (px 5) ], onInput OnInput |> Debug.log "input" ]
+    input [ css [ padding2 (px 10) (px 5) ], onInput OnInput ]
         []
 
 
 button_ : Html Msg
 button_ =
-    button [ onClick Yo ] []
+    button [ onClick Yo ] [ text "Yo à nous le magot" ]
 
 
 main : Book Msg
 main =
     let
         chapters =
-            [ Book.chapter "Chapter 1"
-                [ Book.story "Story 1"
-                    [ Book.ui "test 1" inputView
-                    , Book.ui "test 2" button_
+            [ Fable.chapter "Chapter 1"
+                [ Fable.story "Story 1"
+                    [ Fable.ui "test 1" inputView
+                    , Fable.ui "test 2" button_
                     ]
-                , Book.story "Story 32 %"
-                    [ Book.ui "test 3" inputView
-                    , Book.ui "test 4" button_
+                , Fable.story "Story 32 %"
+                    [ Fable.ui "test 3" inputView
+                    , Fable.ui "test 4" button_
                     ]
                 ]
             ]
     in
-    Book.app chapters
+    Fable.app chapters
