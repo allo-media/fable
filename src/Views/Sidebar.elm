@@ -62,6 +62,15 @@ list =
         ]
 
 
+chapter : Bookmark -> Chapter msg -> Html (Msg msg)
+chapter bookmark (( chapterId, stories ) as chapter_) =
+    li []
+        [ title [] [ text (Chapter.idToString chapterId) ]
+        , List.map (story bookmark chapter_) stories
+            |> ul [ css [ listStyle none, padding zero ] ]
+        ]
+
+
 story : Bookmark -> Chapter msg -> Story msg -> Html (Msg msg)
 story bookmark (( chapterId, _ ) as chapter_) (( storyId, _ ) as story_) =
     case bookmark of
@@ -81,15 +90,6 @@ story bookmark (( chapterId, _ ) as chapter_) (( storyId, _ ) as story_) =
 
         _ ->
             item [ Route.href (Route.Story chapterId storyId) ] [ text (Story.idToString storyId) ]
-
-
-chapter : Bookmark -> Chapter msg -> Html (Msg msg)
-chapter bookmark (( chapterId, stories ) as chapter_) =
-    li []
-        [ title [] [ text (Chapter.idToString chapterId) ]
-        , List.map (story bookmark chapter_) stories
-            |> ul [ css [ listStyle none, padding zero ] ]
-        ]
 
 
 view : Bookmark -> List (Chapter msg) -> Html (Msg msg)

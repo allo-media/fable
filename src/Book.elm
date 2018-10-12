@@ -1,4 +1,4 @@
-module Book exposing (Model, book)
+module Book exposing (Book, app, chapter, story, ui)
 
 {-| With Fable ....
 
@@ -34,6 +34,25 @@ type alias Model msg =
     , bookmark : Bookmark
     , chapters : List (Chapter msg)
     }
+
+
+type alias Book msg =
+    Program () (Model msg) (Msg msg)
+
+
+chapter : String -> List (Story msg) -> Chapter msg
+chapter string stories =
+    ( ChapterId string, stories )
+
+
+story : String -> List (Ui msg) -> Story msg
+story string uis =
+    ( StoryId string, uis )
+
+
+ui : String -> Html msg -> Ui msg
+ui string html =
+    Ui (UiId string) html
 
 
 init : List (Chapter msg) -> () -> Url -> Key -> ( Model msg, Cmd (Msg msg) )
@@ -100,8 +119,8 @@ body ({ chapters, bookmark } as model) =
 
 
 {-| -}
-book : List (Chapter msg) -> Program () (Model msg) (Msg msg)
-book chapters =
+app : List (Chapter msg) -> Book msg
+app chapters =
     Browser.application
         { init = init chapters
         , onUrlChange = InternalMsg << UrlChanged

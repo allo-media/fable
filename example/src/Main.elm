@@ -1,37 +1,42 @@
 module Main exposing (main)
 
-import Book exposing (Model, book)
+import Book as Book exposing (Book)
 import Css exposing (..)
-import Data.Chapter exposing (Chapter, ChapterId(..))
-import Data.Msg exposing (Msg(..))
-import Data.Story exposing (StoryId(..))
-import Data.Ui exposing (Ui, UiId(..))
 import Html.Styled exposing (Html, button, input)
 import Html.Styled.Attributes exposing (css)
 import Html.Styled.Events exposing (..)
 
 
-type MsgEx
+type Msg
     = OnInput String
     | Yo
 
 
-inputView : Html MsgEx
+inputView : Html Msg
 inputView =
     input [ css [ padding2 (px 10) (px 5) ], onInput OnInput |> Debug.log "input" ]
         []
 
 
-chapterList : List (Chapter MsgEx)
-chapterList =
-    [ ( ChapterId "Chapter éeze1"
-      , [ ( StoryId "Story 1 ", [ { id = UiId "test", view = inputView } ] )
-        , ( StoryId "Story 32 %", [ { id = UiId "test", view = button [ onClick Yo ] [] } ] )
-        ]
-      )
-    ]
+button_ : Html Msg
+button_ =
+    button [ onClick Yo ] []
 
 
-main : Program () (Model MsgEx) (Msg MsgEx)
+main : Book Msg
 main =
-    book chapterList
+    let
+        chapters =
+            [ Book.chapter "Chapter 1"
+                [ Book.story "Story 1"
+                    [ Book.ui "test 1" inputView
+                    , Book.ui "test 2" button_
+                    ]
+                , Book.story "Story 32 %"
+                    [ Book.ui "test 3" inputView
+                    , Book.ui "test 4" button_
+                    ]
+                ]
+            ]
+    in
+    Book.app chapters
