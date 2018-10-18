@@ -6,7 +6,9 @@ import Url.Parser exposing (Parser, custom)
 
 
 type alias Chapter msg =
-    ( ChapterId, List (Story msg) )
+    { id : ChapterId
+    , stories : List (Story msg)
+    }
 
 
 type ChapterId
@@ -35,5 +37,5 @@ decodeId string =
 
 find : ChapterId -> List (Chapter msg) -> Maybe (Chapter msg)
 find id chapts =
-    List.filter (\( id_, _ ) -> id_ == id) chapts
+    List.filter (\chapter -> chapter.id == id) chapts
         |> List.head

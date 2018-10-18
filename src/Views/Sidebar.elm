@@ -63,33 +63,33 @@ list =
 
 
 chapter : Bookmark -> Chapter msg -> Html (Msg msg)
-chapter bookmark (( chapterId, stories ) as chapter_) =
+chapter bookmark ({ id, stories } as chapter_) =
     li []
-        [ title [] [ text (Chapter.idToString chapterId) ]
+        [ title [] [ text (Chapter.idToString id) ]
         , List.map (story bookmark chapter_) stories
             |> ul [ css [ listStyle none, padding zero ] ]
         ]
 
 
 story : Bookmark -> Chapter msg -> Story msg -> Html (Msg msg)
-story bookmark (( chapterId, _ ) as chapter_) (( storyId, _ ) as story_) =
+story bookmark ({ id, stories } as chapter_) story_ =
     case bookmark of
         StoryBookmark chapterId_ storyId_ ->
-            if storyId == storyId_ then
-                itemActive [] [ text (Story.idToString storyId) ]
+            if story_.id == storyId_ then
+                itemActive [] [ text (Story.idToString storyId_) ]
 
             else
-                item [ Route.href (Route.Story chapterId storyId) ] [ text (Story.idToString storyId) ]
+                item [ Route.href (Route.Story chapter_.id story_.id) ] [ text (Story.idToString story_.id) ]
 
         UiBookmark chapterId_ storyId_ uiId_ ->
-            if storyId_ == storyId then
-                itemActive [] [ text (Story.idToString storyId) ]
+            if storyId_ == story_.id then
+                itemActive [] [ text (Story.idToString storyId_) ]
 
             else
-                item [ Route.href (Route.Story chapterId storyId) ] [ text (Story.idToString storyId) ]
+                item [ Route.href (Route.Story chapter_.id story_.id) ] [ text (Story.idToString story_.id) ]
 
         _ ->
-            item [ Route.href (Route.Story chapterId storyId) ] [ text (Story.idToString storyId) ]
+            item [ Route.href (Route.Story chapter_.id story_.id) ] [ text (Story.idToString story_.id) ]
 
 
 view : Bookmark -> List (Chapter msg) -> Html (Msg msg)

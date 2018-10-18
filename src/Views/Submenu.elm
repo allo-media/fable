@@ -76,14 +76,14 @@ ui bookmark chapter story ui_ =
                     linkActive [] [ text (Ui.idToString ui_.id) ]
 
                 else
-                    link [ Route.href (Route.Ui chapterId storyId ui_.id) ] [ text (Ui.idToString ui_.id) ]
+                    link [ Route.href (Route.Ui chapterId story.id ui_.id) ] [ text (Ui.idToString ui_.id) ]
 
             _ ->
-                link [ Route.href (Route.Ui (Tuple.first chapter) (Tuple.first story) ui_.id) ] [ text (Ui.idToString ui_.id) ]
+                link [ Route.href (Route.Ui chapter.id story.id ui_.id) ] [ text (Ui.idToString ui_.id) ]
         ]
 
 
 view : Bookmark -> Chapter msg -> Story msg -> Html (Msg msg)
 view bookmark chapter story =
-    List.map (ui bookmark chapter story) (Tuple.second story)
+    List.map (ui bookmark chapter story) story.uis
         |> layout []

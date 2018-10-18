@@ -1,12 +1,6 @@
 module Fable exposing (Book, app, chapter, story, ui)
 
-{-| With Fable ....
-
-
-# Definitions
-
-@docs Chapter
-
+{-| Fable allows you to create a book (like a repository) of your html views, they are grouped as chapters, stories.
 -}
 
 import Browser exposing (Document, UrlRequest)
@@ -26,30 +20,80 @@ import Views.Sidebar as Sidebar
 import Views.Submenu as Submenu
 
 
-{-| -}
+{-| Book application type
+
+    main : Book Msg
+    main =
+        let
+            chapters =
+                [ Fable.chapter "chapter1" [] ]
+        in
+        Fable.app chapters
+
+-}
 type alias Book msg =
     Program () (Model msg) (Msg msg)
 
 
-{-| -}
+{-| Chapter represent a category like Forms, Blocks, or whatever. He needs an unique id.
+
+      chapters = [
+        Fable.chapter "chapter 1" []
+      ]
+
+-}
 chapter : String -> List (Story msg) -> Chapter msg
 chapter string stories =
-    ( ChapterId string, stories )
+    { id = ChapterId string, stories = stories }
 
 
-{-| -}
+{-|
+
+    Story represent an list of element html (like input with different state). He needs an unique id.
+
+      stories = [
+        Fable.story "story 1" []
+      ]
+
+-}
 story : String -> List (Ui msg) -> Story msg
 story string uis =
-    ( StoryId string, uis )
+    { id = StoryId string, uis = uis }
 
 
-{-| -}
+{-|
+
+    Ui represent en element of your view. He needs an unique id.
+
+      ui = [
+        Fable.ui "ui 1" (div [] [])
+      ]
+
+-}
 ui : String -> HS.Html msg -> Ui msg
 ui string html =
     Ui (UiId string) html
 
 
-{-| -}
+{-| Launch a fable application with an list chapters
+
+      main : Book Msg
+      main =
+          Fable.app []
+
+-}
+app : List (Chapter msg) -> Book msg
+app chapters =
+    Browser.application
+        { init = init chapters
+        , onUrlChange = InternalMsg << UrlChanged
+        , onUrlRequest = InternalMsg << UrlRequested
+        , subscriptions = always Sub.none
+        , update = update
+        , view = view
+        }
+
+
 type alias Model msg =
     { navKey : Key
     , bookmark : Bookmark
@@ -57,7 +101,6 @@ type alias Model msg =
     }
 
 
-{-| -}
 init : List (Chapter msg) -> () -> Url -> Key -> ( Model msg, Cmd (Msg msg) )
 init chapters _ url key =
     setRoute (Route.fromUrl url)
@@ -67,7 +110,6 @@ init chapters _ url key =
         }
 
 
-{-| -}
 setRoute : Maybe Route -> Model msg -> ( Model msg, Cmd (Msg msg) )
 setRoute route model =
     case route of
@@ -78,7 +120,15 @@ setRoute route model =
             ( { model | bookmark = ChapterBookmark chapterId }, Cmd.none )
 
         Just (Route.Story chapterId storyId) ->
-            ( { model | bookmark = StoryBookmark chapterId storyId }, Cmd.none )
+            let
+                bookmark_ =
+                    Chapter.find chapterId model.chapters
+                        |> Maybe.andThen (\chapter_ -> Story.find storyId chapter_.stories)
+                        |> Maybe.andThen (\storie_ -> List.head storie_.uis)
+                        |> Maybe.map (\ui_ -> UiBookmark chapterId storyId ui_.id)
+                        |> Maybe.withDefault (StoryBookmark chapterId storyId)
+            in
+            ( { model | bookmark = bookmark_ }, Cmd.none )
 
         Just (Route.Ui chapterId storyId uiId) ->
             ( { model | bookmark = UiBookmark chapterId storyId uiId }, Cmd.none )
@@ -87,7 +137,6 @@ setRoute route model =
             ( model, Cmd.none )
 
 
-{-| -}
 update : Msg msg -> Model msg -> ( Model msg, Cmd (Msg msg) )
 update msg model =
     case msg of
@@ -123,16 +172,3 @@ view ({ bookmark } as model) =
 body : Model msg -> List (H.Html (Msg msg))
 body ({ chapters, bookmark } as model) =
     App.view (Bookmark.view bookmark chapters)
-
-
-{-| -}
-app : List (Chapter msg) -> Book msg
-app chapters =
-    Browser.application
-        { init = init chapters
-        , onUrlChange = InternalMsg << UrlChanged
-        , onUrlRequest = InternalMsg << UrlRequested
-        , subscriptions = always Sub.none
-        , update = update
-        , view = view
-        }

@@ -46,7 +46,7 @@ view bookmark chapters =
         StoryBookmark chapterId storyId ->
             case Chapter.find chapterId chapters of
                 Just chapter ->
-                    case Story.find storyId (Tuple.second chapter) of
+                    case Story.find storyId chapter.stories of
                         Just story ->
                             layout []
                                 [ Sidebar.view bookmark chapters
@@ -68,9 +68,9 @@ view bookmark chapters =
         UiBookmark chapterId storyId uiId ->
             case Chapter.find chapterId chapters of
                 Just chapter ->
-                    case Story.find storyId (Tuple.second chapter) of
+                    case Story.find storyId chapter.stories of
                         Just story ->
-                            case Ui.find uiId (Tuple.second story) of
+                            case Ui.find uiId story.uis of
                                 Just ui ->
                                     layout []
                                         [ Sidebar.view bookmark chapters

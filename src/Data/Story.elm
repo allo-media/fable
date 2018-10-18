@@ -6,7 +6,7 @@ import Url.Parser exposing (Parser, custom)
 
 
 type alias Story msg =
-    ( StoryId, List (Ui msg) )
+    { id : StoryId, uis : List (Ui msg) }
 
 
 type StoryId
@@ -25,7 +25,7 @@ decodeId string =
 
 find : StoryId -> List (Story msg) -> Maybe (Story msg)
 find id stories =
-    List.filter (\story -> Tuple.first story == id) stories
+    List.filter (\story -> story.id == id) stories
         |> List.head
 
 
