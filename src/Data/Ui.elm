@@ -17,12 +17,9 @@ type UiId
 
 decodeId : String -> UiId
 decodeId string =
-    case percentDecode string of
-        Just id ->
-            UiId id
-
-        Nothing ->
-            UiId string
+    percentDecode string
+        |> Maybe.withDefault string
+        |> UiId
 
 
 find : UiId -> List (Ui msg) -> Maybe (Ui msg)

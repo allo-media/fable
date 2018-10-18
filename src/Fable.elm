@@ -56,7 +56,7 @@ type alias Book msg =
     Program () (Model msg) (Msg msg)
 
 
-{-| Chapter represent a category like Forms, Blocks, or whatever. He needs an unique id.
+{-| Chapter represents a category like Forms, Blocks, or whatever. It needs an unique id.
 
       chapters = [
         Fable.chapter "chapter 1" []
@@ -68,9 +68,7 @@ chapter string stories =
     { id = ChapterId string, stories = stories }
 
 
-{-|
-
-    Story represent an list of element html (like input with different state). He needs an unique id.
+{-| Story represents an list of element html (like input with different state). It needs an unique id.
 
       stories = [
         Fable.story "story 1" []
@@ -96,7 +94,7 @@ ui string html =
     Ui (UiId string) html
 
 
-{-| Launch a fable application with an list chapters
+{-| Launch a fable application with a list of chapters
 
       main : Book Msg
       main =

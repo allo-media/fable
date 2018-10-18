@@ -15,12 +15,9 @@ type StoryId
 
 decodeId : String -> StoryId
 decodeId string =
-    case percentDecode string of
-        Just id ->
-            StoryId id
-
-        Nothing ->
-            StoryId string
+    percentDecode string
+        |> Maybe.withDefault string
+        |> StoryId
 
 
 find : StoryId -> List (Story msg) -> Maybe (Story msg)

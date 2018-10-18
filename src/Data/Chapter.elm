@@ -27,12 +27,9 @@ idToString (ChapterId id) =
 
 decodeId : String -> ChapterId
 decodeId string =
-    case percentDecode string of
-        Just id ->
-            ChapterId id
-
-        Nothing ->
-            ChapterId string
+    percentDecode string
+        |> Maybe.withDefault string
+        |> ChapterId
 
 
 find : ChapterId -> List (Chapter msg) -> Maybe (Chapter msg)
