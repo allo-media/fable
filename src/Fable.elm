@@ -1,6 +1,27 @@
-module Fable exposing (Book, app, chapter, story, ui)
+module Fable exposing
+    ( app
+    , Book, chapter, story, ui
+    )
 
 {-| Fable allows you to create a book (like a repository) of your html views, they are grouped as chapters, stories.
+
+
+# App
+
+@docs app
+
+
+# Model
+
+@docs book
+
+
+# Element
+
+@doc chapter
+@doc story
+@doc ui
+
 -}
 
 import Browser exposing (Document, UrlRequest)
