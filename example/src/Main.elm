@@ -9,7 +9,7 @@ import Html.Styled.Events exposing (..)
 
 type Msg
     = OnInput String
-    | NoOp
+    | Blur
 
 
 inputView : Html Msg
@@ -20,7 +20,7 @@ inputView =
 
 button_ : Html Msg
 button_ =
-    button [ onClick NoOp ] [ text "Send" ]
+    button [ onClick Blur ] [ text "Send" ]
 
 
 main : Book Msg
