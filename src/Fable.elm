@@ -68,7 +68,7 @@ chapter string stories =
     { id = ChapterId string, stories = stories }
 
 
-{-| Story represents an list of element html (like input with different state). It needs an unique id.
+{-| Story represents a list of element html (like input with different state). It needs an unique id.
 
       stories = [
         Fable.story "story 1" []
@@ -80,7 +80,7 @@ story string uis =
     { id = StoryId string, uis = uis }
 
 
-{-| Ui represents en element of your view. It needs an unique id.
+{-| Ui represents an element of your view. It needs an unique id.
 
       ui = [
         Fable.ui "ui 1" (div [] [])
