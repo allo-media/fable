@@ -3,7 +3,7 @@
   "name": "allomedia/fable",
   "summary": "Create a book of your html view",
   "license": "BSD-3-Clause",
-  "version": "1.0.2",
+  "version": "1.0.0",
   "exposed-modules": [
     "Fable"
   ],
