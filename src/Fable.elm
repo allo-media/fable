@@ -80,9 +80,7 @@ story string uis =
     { id = StoryId string, uis = uis }
 
 
-{-|
-
-    Ui represent en element of your view. He needs an unique id.
+{-| Ui represents en element of your view. It needs an unique id.
 
       ui = [
         Fable.ui "ui 1" (div [] [])
