@@ -39,10 +39,6 @@ layout =
 view : Bookmark -> List (Chapter msg) -> Html (Msg msg)
 view bookmark chapters =
     case bookmark of
-        ChapterBookmark chapterId ->
-            {- -}
-            div [] []
-
         StoryBookmark chapterId storyId ->
             case Chapter.find chapterId chapters of
                 Just chapter ->
@@ -101,5 +97,5 @@ view bookmark chapters =
                         , none
                         ]
 
-        None ->
+        _ ->
             layout [] [ Sidebar.view bookmark chapters ]
