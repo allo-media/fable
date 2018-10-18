@@ -1,8 +1,15 @@
-module Theme.Submenu exposing (item, link, linkActive, view)
+module Views.Submenu exposing (item, link, view)
 
 import Css exposing (..)
+import Data.Bookmark exposing (Bookmark(..))
+import Data.Chapter exposing (Chapter, ChapterId(..))
+import Data.Msg exposing (Msg(..))
+import Data.Story exposing (Story, StoryId(..))
+import Data.Ui as Ui exposing (Ui, UiId(..))
 import Html.Styled exposing (..)
-import Theme exposing (Element)
+import Html.Styled.Attributes exposing (css)
+import Route.Route as Route
+import Views.Theme exposing (Element)
 
 
 default : Style
@@ -40,13 +47,11 @@ linkActive =
 
 item : Element msg
 item =
-    styled li
-        [ minWidth (px 80)
-        ]
+    styled li [ minWidth (px 80) ]
 
 
-view : Element msg
-view =
+layout : Element msg
+layout =
     styled ul
         [ backgroundColor (rgb 248 248 248)
         , borderBottom3 (px 1) solid (rgb 181 181 181)
@@ -60,3 +65,25 @@ view =
         , padding zero
         , Css.width (pct 100)
         ]
+
+
+ui : Bookmark -> Chapter msg -> Story msg -> Ui msg -> Html (Msg msg)
+ui bookmark chapter story ui_ =
+    item []
+        [ case bookmark of
+            UiBookmark chapterId storyId uiId ->
+                if uiId == ui_.id then
+                    linkActive [] [ text (Ui.idToString ui_.id) ]
+
+                else
+                    link [ Route.href (Route.Ui chapterId story.id ui_.id) ] [ text (Ui.idToString ui_.id) ]
+
+            _ ->
+                link [ Route.href (Route.Ui chapter.id story.id ui_.id) ] [ text (Ui.idToString ui_.id) ]
+        ]
+
+
+view : Bookmark -> Chapter msg -> Story msg -> Html (Msg msg)
+view bookmark chapter story =
+    List.map (ui bookmark chapter story) story.uis
+        |> layout []
