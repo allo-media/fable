@@ -138,14 +138,14 @@ setRoute route model =
 
         Just (Route.Story chapterId storyId) ->
             let
-                bookmark_ =
+                bookmark =
                     Chapter.find chapterId model.chapters
                         |> Maybe.andThen (\chapter_ -> Story.find storyId chapter_.stories)
                         |> Maybe.andThen (\storie_ -> List.head storie_.uis)
                         |> Maybe.map (\ui_ -> UiBookmark chapterId storyId ui_.id)
                         |> Maybe.withDefault (StoryBookmark chapterId storyId)
             in
-            ( { model | bookmark = bookmark_ }, Cmd.none )
+            ( { model | bookmark = bookmark }, Cmd.none )
 
         Just (Route.Ui chapterId storyId uiId) ->
             ( { model | bookmark = UiBookmark chapterId storyId uiId }, Cmd.none )
