@@ -1,8 +1,8 @@
 {
   "type": "package",
-  "name": "allomedia/fable",
+  "name": "allo-media/fable",
   "summary": "Create a book of your html view",
-  "license": "BSD-3-Clause",
+  "license": "MIT",
   "version": "1.0.0",
   "exposed-modules": [
     "Fable"
