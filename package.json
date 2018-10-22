@@ -10,7 +10,6 @@
   },
   "scripts": {
     "live": "elm-live src/Fable.elm --port=3000 --dir=./public/ -- --output=./public/app.js --debug",
-    "example": "elm-live example/src/Main.elm --port=3000 --dir=./example/public -- --output=./example/public/book.js --debug",
     "start": "npm run live"
   },
   "author": "Allo-Media<contact@allo-media.fr>",
