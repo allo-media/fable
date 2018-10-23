@@ -22,6 +22,7 @@ default =
         , Css.property "display" "grid"
         , Css.property "align-items" "center"
         , textAlign center
+        , height (px 40)
         , color (rgb 0 0 0)
         , padding (px 10)
         , borderBottom3 (px 3) solid (rgb 255 255 255)
@@ -59,11 +60,12 @@ layout =
         , Css.height (px 80)
         , Css.property "display" "grid"
         , Css.property "grid-auto-flow" "column"
-        , Css.property "justify-content" "flex-start"
         , Css.property "align-items" "flex-end"
         , listStyle none
         , padding zero
         , Css.width (pct 100)
+        , justifyContent flexStart
+        , fontFamilies [ "Montserrat", .value serif ]
         ]
 
 

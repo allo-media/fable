@@ -21,7 +21,15 @@ view content =
                 , padding zero
                 , fontFamilies [ "Montserrat", .value serif ]
                 , fontSize (px 16)
-                , boxSizing borderBox
+                ]
+            , everything
+                [ boxSizing borderBox
+                , before
+                    [ boxSizing borderBox
+                    ]
+                , after
+                    [ boxSizing borderBox
+                    ]
                 ]
             ]
         , content

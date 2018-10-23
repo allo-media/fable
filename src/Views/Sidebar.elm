@@ -101,6 +101,8 @@ view bookmark chapters =
             , Css.height (pct 100)
             , displayFlex
             , justifyContent center
+            , fontFamilies [ "Montserrat", .value serif ]
+            , fontSize (px 16)
             ]
         ]
         [ List.map (chapter bookmark) chapters
