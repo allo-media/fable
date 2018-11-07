@@ -31,6 +31,14 @@ main =
                 [ Fable.story "Story 1"
                     [ Fable.ui "test 1" inputView
                     , Fable.ui "test 2" button_
+                    , Fable.ui "test 3" inputView
+                    , Fable.ui "test 4" button_
+                    , Fable.ui "test 5" inputView
+                    , Fable.ui "test 6" button_
+                    , Fable.ui "test 7" inputView
+                    , Fable.ui "test 8" button_
+                    , Fable.ui "test 9" inputView
+                    , Fable.ui "test 10" button_
                     ]
                 , Fable.story "Story 32 %"
                     [ Fable.ui "test 3" inputView

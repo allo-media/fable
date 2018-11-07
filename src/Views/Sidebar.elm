@@ -8,6 +8,7 @@ import Data.Story as Story exposing (..)
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (..)
 import Route.Route as Route exposing (Route(..))
+import Views.Logo as Logo
 import Views.Theme exposing (Element)
 
 
@@ -57,8 +58,19 @@ list =
     styled ul
         [ listStyle none
         , padding (px 10)
-        , Css.width (px 200)
         , marginTop (px 30)
+        ]
+
+
+logo : Element msg
+logo =
+    styled div
+        [ backgroundColor (hex "905F3E")
+        , Css.height (px 200)
+        , displayFlex
+        , justifyContent center
+        , alignItems center
+        , borderBottom3 (Css.px 2) dashed (hex "D5A021")
         ]
 
 
@@ -96,15 +108,13 @@ view : Bookmark -> List (Chapter msg) -> Html (Msg msg)
 view bookmark chapters =
     div
         [ css
-            [ backgroundColor (rgb 47 51 56)
-            , Css.width (pct 100)
+            [ backgroundColor (rgb 237 231 217)
             , Css.height (pct 100)
-            , displayFlex
-            , justifyContent center
             , fontFamilies [ "Montserrat", .value serif ]
             , fontSize (px 16)
             ]
         ]
-        [ List.map (chapter bookmark) chapters
+        [ logo [] [ Logo.view ]
+        , List.map (chapter bookmark) chapters
             |> list []
         ]

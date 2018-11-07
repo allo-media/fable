@@ -31,7 +31,7 @@ layout : Element msg
 layout =
     styled div
         [ Css.property "display" "grid"
-        , Css.property "grid-template-columns" "auto 1fr"
+        , Css.property "grid-template-columns" "13fr 21fr"
         , Css.height (vh 100)
         ]
 
@@ -45,8 +45,16 @@ view bookmark chapters =
                     case Story.find storyId chapter.stories of
                         Just story ->
                             layout []
-                                [ Sidebar.view bookmark chapters
-                                , Submenu.view bookmark chapter story
+                                [ div
+                                    [ css
+                                        [ Css.property "display" "grid"
+                                        , Css.property "grid-template-columns" "5fr 8fr"
+                                        , Css.justifyContent flexStart
+                                        ]
+                                    ]
+                                    [ Sidebar.view bookmark chapters
+                                    , Submenu.view bookmark chapter story
+                                    ]
                                 ]
 
                         Nothing ->
@@ -69,12 +77,51 @@ view bookmark chapters =
                             case Ui.find uiId story.uis of
                                 Just ui ->
                                     layout []
-                                        [ Sidebar.view bookmark chapters
-                                        , div []
-                                            [ Submenu.view bookmark chapter story
-                                            , div [ css [ padding (px 20) ] ]
-                                                [ ui.view
-                                                    |> Html.map ExternalMsg
+                                        [ div
+                                            [ css
+                                                [ Css.property "display" "grid"
+                                                , Css.property "grid-template-columns" "5fr 8fr"
+                                                ]
+                                            ]
+                                            [ Sidebar.view bookmark chapters
+                                            , Submenu.view bookmark chapter story
+                                            ]
+                                        , div
+                                            [ css
+                                                [ Css.property "display" "grid"
+                                                , justifyContent center
+                                                , alignItems center
+                                                , position relative
+                                                ]
+                                            ]
+                                            [ div
+                                                [ css
+                                                    [ position absolute
+                                                    , top (Css.pct 10)
+                                                    , bottom (Css.pct 30)
+                                                    , left (Css.pct 10)
+                                                    , right (Css.pct 10)
+                                                    , Css.property "display" "grid"
+                                                    , Css.property "grid-template-rows" "auto 1fr"
+                                                    ]
+                                                ]
+                                                [ h1
+                                                    [ css
+                                                        [ fontSize (rem 3.125)
+                                                        , textTransform capitalize
+                                                        ]
+                                                    ]
+                                                    [ text (Ui.idToString ui.id) ]
+                                                , div
+                                                    [ css
+                                                        [ backgroundColor (rgb 251 251 251)
+                                                        , border3 (px 10) solid (rgb 75 56 65)
+                                                        , padding (px 20)
+                                                        ]
+                                                    ]
+                                                    [ ui.view
+                                                        |> Html.map ExternalMsg
+                                                    ]
                                                 ]
                                             ]
                                         ]

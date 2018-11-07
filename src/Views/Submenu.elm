@@ -16,19 +16,13 @@ default : Style
 default =
     batch
         [ textDecoration none
-        , backgroundColor (rgb 255 255 255)
-        , Css.width (px 80)
-        , Css.height (px 30)
+        , Css.width (pct 100)
+        , Css.height (pct 100)
         , Css.property "display" "grid"
         , Css.property "align-items" "center"
         , textAlign center
-        , height (px 40)
         , color (rgb 0 0 0)
         , padding (px 10)
-        , borderBottom3 (px 3) solid (rgb 255 255 255)
-        , hover
-            [ borderBottom3 (px 3) solid (rgba 99 167 245 0.8)
-            ]
         ]
 
 
@@ -41,14 +35,32 @@ link =
 linkActive : Element msg
 linkActive =
     styled span
-        [ default
-        , borderBottom3 (px 3) solid (rgba 99 167 245 1)
-        ]
+        [ default ]
 
 
 item : Element msg
 item =
-    styled li [ minWidth (px 80) ]
+    styled li
+        [ minHeight (px 135)
+        , borderBottom3 (px 1) solid (rgba 0 0 0 0.05)
+        , Css.property "display" "grid"
+        , hover
+            [ Css.property "box-shadow" "0 10px 40px 0 rgba(0, 0, 0, 0.1), 0 3px 4px 0 rgb(125, 4, 46)"
+            ]
+        ]
+
+
+layout2 : Element msg
+layout2 =
+    styled ul
+        [ backgroundColor (rgb 255 255 255)
+        , listStyle none
+        , padding zero
+        , margin zero
+        , border3 (px 2) solid (rgba 0 0 0 0.05)
+        , Css.height (vh 100)
+        , overflow auto
+        ]
 
 
 layout : Element msg
@@ -88,4 +100,4 @@ ui bookmark chapter story ui_ =
 view : Bookmark -> Chapter msg -> Story msg -> Html (Msg msg)
 view bookmark chapter story =
     List.map (ui bookmark chapter story) story.uis
-        |> layout []
+        |> layout2 []
