@@ -1,8 +1,8 @@
 module Route.Route exposing (Route(..), fromUrl, href)
 
-import Data.Chapter as Chapter exposing (ChapterId)
-import Data.Story as Story exposing (StoryId)
-import Data.Ui as Ui exposing (UiId)
+import Data.Chapter as Chapter exposing (ChapterId(..))
+import Data.Story as Story exposing (StoryId(..))
+import Data.Ui as Ui exposing (UiId(..))
 import Html.Styled exposing (Attribute)
 import Html.Styled.Attributes as Attributes
 import Url exposing (Url, percentEncode)

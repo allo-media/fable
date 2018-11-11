@@ -22,7 +22,7 @@ title bookmark =
             Chapter.idToString chapterId ++ " :: " ++ Story.idToString storyId
 
         UiBookmark chapterId storyId uiId ->
-            String.join " :: " [ Ui.idToString uiId, Story.idToString storyId, Chapter.idToString chapterId ]
+            String.join " :: " [ Chapter.idToString chapterId, Story.idToString storyId, Ui.idToString uiId ]
 
         None ->
             ""

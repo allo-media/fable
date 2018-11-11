@@ -1,16 +1,41 @@
-module Views.Logo exposing (view)
+module Views.Icon exposing (chapter, fable, story)
 
 import Css exposing (..)
 import Svg.Styled as S exposing (..)
 import Svg.Styled.Attributes as SA exposing (..)
 
 
-view : Svg msg
-view =
+story : Svg msg
+story =
     svg
         [ css
-            [ Css.fill (rgb 237 231 217)
-            , Css.width (px 100)
+            [ Css.width (Css.rem 1.5)
+            ]
+        , SA.viewBox "0 0 100 125"
+        ]
+        [ S.path [ d "M76 8.8c-.1 0-.1 0 0 0h-.2c-46.4 0-71.3 83.4-65.3 83.4 2.5 0 7.9-31.4 38.5-38-1.2.3 2.2 1 3.5 1 3.7 0 6.9-2.7 7.6-6.2 1.4 1 3.1 1.5 4.9 1.5 4.3 0 7.8-3.1 8.5-7.2.8.1 1.6.2 2.4.2 9.6 0 17.4-7.8 17.4-17.4S85.6 8.8 76 8.8z" ] []
+        ]
+
+
+chapter : Svg msg
+chapter =
+    svg
+        [ css
+            [ Css.width (Css.rem 1.5)
+            , Css.fill (rgba 255 255 255 0.35)
+            ]
+        , SA.viewBox "0 0 16 20"
+        ]
+        [ S.path [ d "M13 0H3c-.55 0-1 .45-1 1v14c0 .55.318.682.707.293l4.586-4.586c.389-.389 1.025-.389 1.414 0l4.586 4.586c.389.389.707.257.707-.293V1c0-.55-.45-1-1-1z" ] []
+        ]
+
+
+fable : Svg msg
+fable =
+    svg
+        [ css
+            [ Css.fill (rgba 255 255 255 0.7)
+            , Css.width (Css.rem 5)
             ]
         , SA.viewBox "0 0 58.12 78.75"
         ]

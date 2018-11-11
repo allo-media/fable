@@ -2,15 +2,18 @@ module Views.Bookmark exposing (none, view)
 
 import Css exposing (..)
 import Data.Bookmark exposing (Bookmark(..))
-import Data.Chapter as Chapter exposing (Chapter)
+import Data.Chapter as Chapter exposing (Chapter, ChapterId(..))
 import Data.Msg exposing (Msg(..))
-import Data.Story as Story exposing (Story)
-import Data.Ui as Ui exposing (find)
+import Data.Story as Story exposing (StoryId(..))
+import Data.Ui as Ui exposing (UiId(..), find)
 import Html.Styled as Html exposing (..)
 import Html.Styled.Attributes exposing (..)
+import Views.Icon as Icon
+import Views.Menu.Primary as MenuPrimary
+import Views.Menu.Secondary as MenuSecondary
 import Views.Sidebar as Sidebar
-import Views.Submenu as Submenu
 import Views.Theme exposing (Element)
+import Views.Ui as VUi
 
 
 none : Html msg
@@ -36,113 +39,44 @@ layout =
         ]
 
 
-view : Bookmark -> List (Chapter msg) -> Html (Msg msg)
+view : Bookmark -> List (Chapter msg) -> List (Html (Msg msg))
 view bookmark chapters =
     case bookmark of
-        StoryBookmark chapterId storyId ->
-            case Chapter.find chapterId chapters of
-                Just chapter ->
-                    case Story.find storyId chapter.stories of
-                        Just story ->
-                            layout []
-                                [ div
-                                    [ css
-                                        [ Css.property "display" "grid"
-                                        , Css.property "grid-template-columns" "5fr 8fr"
-                                        , Css.justifyContent flexStart
-                                        ]
-                                    ]
-                                    [ Sidebar.view bookmark chapters
-                                    , Submenu.view bookmark chapter story
-                                    ]
-                                ]
-
-                        Nothing ->
-                            layout []
-                                [ Sidebar.view bookmark chapters
-                                , none
-                                ]
-
-                Nothing ->
-                    layout []
-                        [ Sidebar.view bookmark chapters
-                        , none
-                        ]
-
         UiBookmark chapterId storyId uiId ->
-            case Chapter.find chapterId chapters of
-                Just chapter ->
-                    case Story.find storyId chapter.stories of
-                        Just story ->
-                            case Ui.find uiId story.uis of
-                                Just ui ->
-                                    layout []
-                                        [ div
-                                            [ css
-                                                [ Css.property "display" "grid"
-                                                , Css.property "grid-template-columns" "5fr 8fr"
-                                                ]
-                                            ]
-                                            [ Sidebar.view bookmark chapters
-                                            , Submenu.view bookmark chapter story
-                                            ]
-                                        , div
-                                            [ css
-                                                [ Css.property "display" "grid"
-                                                , justifyContent center
-                                                , alignItems center
-                                                , position relative
-                                                ]
-                                            ]
-                                            [ div
-                                                [ css
-                                                    [ position absolute
-                                                    , top (Css.pct 10)
-                                                    , bottom (Css.pct 30)
-                                                    , left (Css.pct 10)
-                                                    , right (Css.pct 10)
-                                                    , Css.property "display" "grid"
-                                                    , Css.property "grid-template-rows" "auto 1fr"
-                                                    ]
-                                                ]
-                                                [ h1
-                                                    [ css
-                                                        [ fontSize (rem 3.125)
-                                                        , textTransform capitalize
-                                                        ]
-                                                    ]
-                                                    [ text (Ui.idToString ui.id) ]
-                                                , div
-                                                    [ css
-                                                        [ backgroundColor (rgb 251 251 251)
-                                                        , border3 (px 10) solid (rgb 75 56 65)
-                                                        , padding (px 20)
-                                                        ]
-                                                    ]
-                                                    [ ui.view
-                                                        |> Html.map ExternalMsg
-                                                    ]
-                                                ]
-                                            ]
-                                        ]
+            let
+                chapter =
+                    Chapter.find chapterId chapters
+                        |> Maybe.withDefault { id = ChapterId "error", stories = [] }
 
-                                Nothing ->
-                                    layout []
-                                        [ Sidebar.view bookmark chapters
-                                        , none
-                                        ]
+                story =
+                    Story.find storyId chapter.stories
+                        |> Maybe.withDefault { id = StoryId "error", uis = [] }
 
-                        Nothing ->
-                            layout []
-                                [ Sidebar.view bookmark chapters
-                                , none
-                                ]
-
-                Nothing ->
-                    layout []
-                        [ Sidebar.view bookmark chapters
-                        , none
-                        ]
+                ui =
+                    Ui.find uiId story.uis
+                        |> Maybe.withDefault { id = UiId "errror", view = div [] [] }
+            in
+            [ Sidebar.layout []
+                [ div [ css [ backgroundColor (hex "343E3D") ] ]
+                    [ Sidebar.logo [] [ Icon.fable ]
+                    , MenuPrimary.view (Just chapterId) (Just storyId) chapters
+                    ]
+                , MenuSecondary.view chapterId storyId (Just uiId) story.uis
+                ]
+            , VUi.view ui
+            ]
 
         _ ->
-            layout [] [ Sidebar.view bookmark chapters ]
+            [ Sidebar.layout []
+                [ div [ css [ backgroundColor (hex "343E3D") ] ]
+                    [ Sidebar.logo [] [ Icon.fable ]
+                    , MenuPrimary.view Nothing Nothing chapters
+                    ]
+                ]
+            ]
+
+
+
+-- [ Sidebar.view bookmark chapters
+-- , none
+-- ]
