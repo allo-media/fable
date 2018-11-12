@@ -2,23 +2,9 @@
 
 Fable allows you to create a book (like a repository) of your html views, they are grouped as chapters, stories.
 
-# Developpement
-
-```
-$ npm i
-$ elm install
-```
-
-# Run example
-
-```
-$ npm run example
-```
-
 # Example of fable app
 
 ```
-
 import Fable as Fable exposing (Book)
 import Html.Styled exposing (div)
 
@@ -33,4 +19,19 @@ main =
             ]
     in
     Fable.app chapters
+```
+
+# Developpement
+
+```
+$ npm i
+$ elm install
+```
+
+# Run example
+
+```
+$ cd example
+$ npm i
+$ npm start
 ```

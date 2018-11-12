@@ -40,8 +40,6 @@ import Route.Route as Route exposing (Route, href)
 import Url exposing (Url)
 import Views.App as App
 import Views.Bookmark as Bookmark
-import Views.Sidebar as Sidebar
-import Views.Submenu as Submenu
 
 
 {-| Book application type
@@ -92,7 +90,7 @@ story string uis =
 -}
 ui : String -> HS.Html msg -> Ui msg
 ui string html =
-    Ui (UiId string) html
+    { id = UiId string, view = html }
 
 
 {-| Launch a fable application with a list of chapters
@@ -134,18 +132,33 @@ setRoute : Maybe Route -> Model msg -> ( Model msg, Cmd (Msg msg) )
 setRoute route model =
     case route of
         Nothing ->
-            ( model, Cmd.none )
+            ( { model | bookmark = None }, Cmd.none )
 
         Just (Route.Chapter chapterId) ->
-            ( { model | bookmark = ChapterBookmark chapterId }, Cmd.none )
+            let
+                bookmark =
+                    Chapter.find chapterId model.chapters
+                        |> Maybe.andThen (List.head << .stories)
+                        |> Maybe.andThen
+                            (\{ id, uis } ->
+                                case uis of
+                                    ui_ :: _ ->
+                                        Just (UiBookmark chapterId id ui_.id)
+
+                                    [] ->
+                                        Just (StoryBookmark chapterId id)
+                            )
+                        |> Maybe.withDefault (ChapterBookmark chapterId)
+            in
+            ( { model | bookmark = bookmark }, Cmd.none )
 
         Just (Route.Story chapterId storyId) ->
             let
                 bookmark =
                     Chapter.find chapterId model.chapters
-                        |> Maybe.andThen (\chapter_ -> Story.find storyId chapter_.stories)
-                        |> Maybe.andThen (\storie_ -> List.head storie_.uis)
-                        |> Maybe.map (\ui_ -> UiBookmark chapterId storyId ui_.id)
+                        |> Maybe.andThen (Story.find storyId << .stories)
+                        |> Maybe.andThen (List.head << .uis)
+                        |> Maybe.map (UiBookmark chapterId storyId << .id)
                         |> Maybe.withDefault (StoryBookmark chapterId storyId)
             in
             ( { model | bookmark = bookmark }, Cmd.none )
@@ -154,7 +167,30 @@ setRoute route model =
             ( { model | bookmark = UiBookmark chapterId storyId uiId }, Cmd.none )
 
         Just Route.Home ->
-            ( model, Cmd.none )
+            let
+                bookmark =
+                    List.head model.chapters
+                        |> Maybe.andThen
+                            (\{ id, stories } ->
+                                case stories of
+                                    story_ :: _ ->
+                                        Just { chapterId = id, storyId = story_.id, uis = story_.uis }
+
+                                    [] ->
+                                        Nothing
+                            )
+                        |> Maybe.map
+                            (\{ chapterId, storyId, uis } ->
+                                case uis of
+                                    ui_ :: _ ->
+                                        UiBookmark chapterId storyId ui_.id
+
+                                    [] ->
+                                        StoryBookmark chapterId storyId
+                            )
+                        |> Maybe.withDefault None
+            in
+            ( { model | bookmark = bookmark }, Cmd.none )
 
 
 update : Msg msg -> Model msg -> ( Model msg, Cmd (Msg msg) )
