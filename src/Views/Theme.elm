@@ -15,7 +15,7 @@ type alias Theme =
 
 theme : Theme
 theme =
-    { backgroundMainColor = hex "103D3C" }
+    { backgroundMainColor = hex "#05519A" }
 
 
 updateAlphaColor : Color -> Float -> Color
