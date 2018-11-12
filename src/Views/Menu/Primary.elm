@@ -1,6 +1,7 @@
 module Views.Menu.Primary exposing (view)
 
-import Css exposing (..)
+import Css as Css exposing (..)
+import Css.Animations as CA
 import Css.Global exposing (descendants, typeSelector)
 import Data.Bookmark exposing (Bookmark(..))
 import Data.Chapter as Chapter exposing (Chapter, ChapterId(..))
@@ -21,18 +22,26 @@ defaultStory : Style
 defaultStory =
     Css.batch
         [ Css.property "display" "grid"
-        , Css.property "grid-template-columns" "auto 1fr"
-        , Css.property "justify-content" "center"
+
+        -- , Css.property "grid-template-columns" "auto 1fr"
+        -- , Css.property "justify-content" "center"
         , Css.property "align-content" "center"
         , Css.property "grid-gap" "0.5rem"
-        , padding4 (rem 0.3125) zero zero (rem 1.5625)
         , hover
             [ descendants
                 [ typeSelector "svg"
                     [ fill (rgba 255 255 255 0.5)
                     ]
                 ]
-            , backgroundColor (rgba 255 255 255 0.2)
+            , Css.backgroundColor (rgba 255 255 255 0.5)
+            , Css.animationName
+                (CA.keyframes
+                    [ ( 0, [ CA.backgroundColor (rgba 255 255 255 0) ] )
+                    , ( 100, [ CA.backgroundColor (rgba 255 255 255 0.5) ] )
+                    ]
+                )
+            , Css.animationDuration (Css.ms 200)
+            , Css.animationIterationCount (Css.num 1)
             ]
         , active
             [ backgroundColor (rgba 0 0 0 0.1)
@@ -77,9 +86,10 @@ list =
 link : Element msg
 link =
     styled a
-        [ color (rgba 255 255 255 1)
+        [ color (rgba 255 255 255 0.6)
         , textDecoration none
-        , textTransform uppercase
+        , textTransform capitalize
+        , padding4 (px 7) (px 7) (px 7) (Css.rem 3)
         ]
 
 
@@ -117,8 +127,7 @@ story chapterId storyId chapter_ story_ =
                 defaultStory
             ]
         ]
-        [ Icon.story
-        , link [ Route.href (Route.Story chapter_.id story_.id) ] [ text (Story.idToString story_.id) ]
+        [ link [ Route.href (Route.Story chapter_.id story_.id) ] [ text (Story.idToString story_.id) ]
         ]
 
 
@@ -128,11 +137,12 @@ title string =
         [ css
             [ Css.property "display" "grid"
             , Css.property "grid-template-columns" "auto 1fr"
-            , padding4 (px 10) (px 0) (px 5) (px 5)
+            , padding4 (px 15) (px 0) (px 10) (px 20)
             , backgroundColor (rgba 255 255 255 0.05)
             , descendants
                 [ typeSelector "svg"
                     [ fill (rgba 255 255 255 0.7)
+                    , Css.width (Css.rem 1.275)
                     ]
                 ]
             ]

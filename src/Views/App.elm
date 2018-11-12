@@ -6,6 +6,7 @@ import Data.Msg exposing (Msg)
 import Html exposing (Html)
 import Html.Styled as HS exposing (div, text, toUnstyled)
 import Html.Styled.Attributes exposing (css)
+import Views.Theme exposing (theme)
 
 
 view : List (HS.Html (Msg msg)) -> List (Html (Msg msg))
@@ -13,7 +14,7 @@ view content =
     List.map toUnstyled
         [ global
             [ html [ margin zero, padding zero ]
-            , body [ margin zero, padding zero ]
+            , body [ margin zero, padding zero, backgroundColor theme.backgroundMainColor ]
             , everything
                 [ boxSizing borderBox
                 , before [ boxSizing borderBox ]

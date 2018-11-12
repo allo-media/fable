@@ -5,7 +5,7 @@ import Data.Msg exposing (Msg(..))
 import Data.Ui as Ui exposing (Ui, UiId(..))
 import Html.Styled as Html exposing (..)
 import Html.Styled.Attributes exposing (..)
-import Views.Theme exposing (Element)
+import Views.Theme exposing (Element, theme)
 
 
 layout : Element msg
@@ -15,7 +15,7 @@ layout =
         , justifyContent center
         , alignItems center
         , position relative
-        , backgroundColor (hex "f0ebe05e")
+        , backgroundColor (rgba 255 255 255 0.988)
         ]
 
 

@@ -1,6 +1,7 @@
 module Views.Bookmark exposing (none, view)
 
 import Css exposing (..)
+import Css.Global exposing (descendants, typeSelector)
 import Data.Bookmark exposing (Bookmark(..))
 import Data.Chapter as Chapter exposing (Chapter, ChapterId(..))
 import Data.Msg exposing (Msg(..))
@@ -12,7 +13,7 @@ import Views.Icon as Icon
 import Views.Menu.Primary as MenuPrimary
 import Views.Menu.Secondary as MenuSecondary
 import Views.Sidebar as Sidebar
-import Views.Theme exposing (Element)
+import Views.Theme exposing (Element, theme, updateAlphaColor)
 import Views.Ui as VUi
 
 
@@ -21,13 +22,24 @@ none =
     div
         [ css
             [ Css.property "display" "grid"
+            , Css.property "grid-template-row" "auto auto"
             , Css.property "justify-content" "center"
             , Css.property "align-content" "center"
             , fontSize (rem 2)
             , color (rgba 0 0 0 0.5)
+            , backgroundColor (rgba 255 255 255 0.99)
+            , fontFamilies [ "Montserrat", .value serif ]
+            , descendants
+                [ typeSelector "svg"
+                    [ fill (updateAlphaColor theme.backgroundMainColor 0.9)
+                    , Css.width (Css.rem 2)
+                    , Css.property "align-self" "center"
+                    ]
+                ]
             ]
         ]
-        [ text "None" ]
+        [ text "Hey, I'm lost. I think that somethings get wrong."
+        ]
 
 
 layout : Element msg
@@ -57,7 +69,7 @@ view bookmark chapters =
                         |> Maybe.withDefault { id = UiId "errror", view = div [] [] }
             in
             [ Sidebar.layout []
-                [ div [ css [ backgroundColor (hex "343E3D") ] ]
+                [ div []
                     [ Sidebar.logo [] [ Icon.fable ]
                     , MenuPrimary.view (Just chapterId) (Just storyId) chapters
                     ]
@@ -68,15 +80,10 @@ view bookmark chapters =
 
         _ ->
             [ Sidebar.layout []
-                [ div [ css [ backgroundColor (hex "343E3D") ] ]
+                [ div [ css [ Css.property "grid-column" "1/3" ] ]
                     [ Sidebar.logo [] [ Icon.fable ]
                     , MenuPrimary.view Nothing Nothing chapters
                     ]
                 ]
+            , none
             ]
-
-
-
--- [ Sidebar.view bookmark chapters
--- , none
--- ]

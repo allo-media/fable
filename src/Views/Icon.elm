@@ -9,7 +9,7 @@ story : Svg msg
 story =
     svg
         [ css
-            [ Css.width (Css.rem 1.5)
+            [ Css.width (Css.rem 6)
             ]
         , SA.viewBox "0 0 100 125"
         ]

@@ -132,28 +132,26 @@ setRoute : Maybe Route -> Model msg -> ( Model msg, Cmd (Msg msg) )
 setRoute route model =
     case route of
         Nothing ->
-            ( model, Cmd.none )
+            ( { model | bookmark = None }, Cmd.none )
 
         Just (Route.Chapter chapterId) ->
             let
                 bookmark =
                     Chapter.find chapterId model.chapters
                         |> Maybe.andThen (List.head << .stories)
-                        |> Maybe.andThen (\story_ -> Just ( story_.id, List.head story_.uis ))
                         |> Maybe.andThen
-                            (\( id_, ui_ ) ->
-                                case ui_ of
-                                    Just ({ id } as ui__) ->
-                                        Just (UiBookmark chapterId id_ id)
+                            (\{ id, uis } ->
+                                case uis of
+                                    ui_ :: _ ->
+                                        Just (UiBookmark chapterId id ui_.id)
 
-                                    Nothing ->
-                                        Just (StoryBookmark chapterId id_)
+                                    [] ->
+                                        Just (StoryBookmark chapterId id)
                             )
                         |> Maybe.withDefault (ChapterBookmark chapterId)
             in
             ( { model | bookmark = bookmark }, Cmd.none )
 
-        -- ( { model | bookmark = ChapterBookmark chapterId }, Cmd.none )
         Just (Route.Story chapterId storyId) ->
             let
                 bookmark =
@@ -169,7 +167,30 @@ setRoute route model =
             ( { model | bookmark = UiBookmark chapterId storyId uiId }, Cmd.none )
 
         Just Route.Home ->
-            ( model, Cmd.none )
+            let
+                bookmark =
+                    List.head model.chapters
+                        |> Maybe.andThen
+                            (\{ id, stories } ->
+                                case stories of
+                                    story_ :: _ ->
+                                        Just { chapterId = id, storyId = story_.id, uis = story_.uis }
+
+                                    [] ->
+                                        Nothing
+                            )
+                        |> Maybe.map
+                            (\{ chapterId, storyId, uis } ->
+                                case uis of
+                                    ui_ :: _ ->
+                                        UiBookmark chapterId storyId ui_.id
+
+                                    [] ->
+                                        StoryBookmark chapterId storyId
+                            )
+                        |> Maybe.withDefault None
+            in
+            ( { model | bookmark = bookmark }, Cmd.none )
 
 
 update : Msg msg -> Model msg -> ( Model msg, Cmd (Msg msg) )

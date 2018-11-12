@@ -1,6 +1,7 @@
 module Views.Menu.Secondary exposing (view)
 
 import Css exposing (..)
+import Css.Animations as CA
 import Data.Bookmark exposing (Bookmark(..))
 import Data.Chapter as Chapter exposing (Chapter, ChapterId(..))
 import Data.Msg exposing (Msg(..))
@@ -9,7 +10,7 @@ import Data.Ui as Ui exposing (Ui, UiId(..))
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (css, href)
 import Route.Route as Route
-import Views.Theme exposing (Element)
+import Views.Theme exposing (Element, theme, updateAlphaColor)
 
 
 defaultLink : Style
@@ -26,18 +27,41 @@ defaultLink =
         ]
 
 
-item : Element msg
-item =
-    styled li
+defaultItem : Style
+defaultItem =
+    let
+        { red, green, blue, alpha } =
+            theme.backgroundMainColor
+    in
+    Css.batch
         [ borderBottom3 (px 1) solid (rgba 0 0 0 0.05)
         , Css.property "display" "grid"
         , Css.property "grid-template-rows" "auto 1fr"
         , padding2 (px 10) (px 15)
+        , hover
+            [ Css.animationName
+                (CA.keyframes
+                    [ ( 0, [ CA.backgroundColor (rgba 255 255 255 0) ] )
+                    , ( 100, [ CA.backgroundColor (updateAlphaColor theme.backgroundMainColor 0.1) ] )
+                    ]
+                )
+            , Css.animationDuration (Css.ms 500)
+            , Css.animationIterationCount (Css.num 1)
+            , Css.backgroundColor (updateAlphaColor theme.backgroundMainColor 0.1)
+            ]
+        , active [ Css.backgroundColor (updateAlphaColor theme.backgroundMainColor 0.2) ]
+        ]
 
-        -- , hover [ backgroundColor (rgba 213 160 33 0.05) ]
-        -- , active [ backgroundColor (rgba 213 160 33 0.1) ]
-        , hover [ backgroundColor (rgba 213 160 33 0.05) ]
-        , active [ backgroundColor (rgba 213 160 33 0.1) ]
+
+itemActive : Style
+itemActive =
+    let
+        { red, green, blue, alpha } =
+            theme.backgroundMainColor
+    in
+    Css.batch
+        [ defaultItem
+        , Css.backgroundColor (updateAlphaColor theme.backgroundMainColor 0.2)
         ]
 
 
@@ -51,12 +75,20 @@ link =
 list : Element msg
 list =
     styled ul
-        [ -- backgroundColor (rgb 255 255 255)
-          listStyle none
+        [ listStyle none
         , padding zero
         , margin zero
         , borderRight3 (px 2) solid (rgba 0 0 0 0.05)
         , Css.height (vh 100)
+        , backgroundColor (rgba 255 255 255 1)
+        , position relative
+        ]
+
+
+layout : List (Html (Msg msg)) -> Html (Msg msg)
+layout content =
+    div []
+        [ list [] content
         ]
 
 
@@ -76,10 +108,19 @@ ui chapterId storyId uiId ui_ =
             Maybe.map ((==) ui_.id) uiId
                 |> Maybe.withDefault False
     in
-    item [] [ link [ Route.href (Route.Ui chapterId storyId ui_.id) ] [ name [] [ text (Ui.idToString ui_.id) ] ] ]
+    li
+        [ css
+            [ if active then
+                itemActive
+
+              else
+                defaultItem
+            ]
+        ]
+        [ link [ Route.href (Route.Ui chapterId storyId ui_.id) ] [ name [] [ text (Ui.idToString ui_.id) ] ] ]
 
 
 view : ChapterId -> StoryId -> Maybe UiId -> List (Ui msg) -> Html (Msg msg)
 view chapterId storyId uiId uis =
     List.map (ui chapterId storyId uiId) uis
-        |> list []
+        |> layout
