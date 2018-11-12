@@ -13,8 +13,15 @@ view : List (HS.Html (Msg msg)) -> List (Html (Msg msg))
 view content =
     List.map toUnstyled
         [ global
-            [ html [ margin zero, padding zero ]
-            , body [ margin zero, padding zero, backgroundColor theme.backgroundMainColor ]
+            [ html
+                [ margin zero
+                , padding zero
+                ]
+            , body
+                [ margin zero
+                , padding zero
+                , backgroundColor theme.backgroundMainColor
+                ]
             , everything
                 [ boxSizing borderBox
                 , before [ boxSizing borderBox ]

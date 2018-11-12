@@ -22,9 +22,6 @@ defaultStory : Style
 defaultStory =
     Css.batch
         [ Css.property "display" "grid"
-
-        -- , Css.property "grid-template-columns" "auto 1fr"
-        -- , Css.property "justify-content" "center"
         , Css.property "align-content" "center"
         , Css.property "grid-gap" "0.5rem"
         , hover
