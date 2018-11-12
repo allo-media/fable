@@ -3,7 +3,7 @@
     "name": "allo-media/fable",
     "summary": "Create a book of your html view",
     "license": "MIT",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "exposed-modules": [
         "Fable"
     ],
