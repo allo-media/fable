@@ -71,7 +71,7 @@ view bookmark chapters =
             [ Sidebar.layout []
                 [ div []
                     [ Sidebar.logo [] [ Icon.fable ]
-                    , MenuPrimary.view (Just chapterId) (Just storyId) chapters
+                    , MenuPrimary.view (MenuPrimary.select chapterId storyId) chapters
                     ]
                 , MenuSecondary.view chapterId storyId (Just uiId) story.uis
                 ]
@@ -82,7 +82,7 @@ view bookmark chapters =
             [ Sidebar.layout []
                 [ div [ css [ Css.property "grid-column" "1/3" ] ]
                     [ Sidebar.logo [] [ Icon.fable ]
-                    , MenuPrimary.view Nothing Nothing chapters
+                    , MenuPrimary.view MenuPrimary.nothing chapters
                     ]
                 ]
             , none

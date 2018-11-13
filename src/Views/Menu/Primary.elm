@@ -1,17 +1,32 @@
-module Views.Menu.Primary exposing (view)
+module Views.Menu.Primary exposing (nothing, select, view)
 
 import Css as Css exposing (..)
 import Css.Animations as CA
 import Css.Global exposing (descendants, typeSelector)
 import Data.Bookmark exposing (Bookmark(..))
-import Data.Chapter as Chapter exposing (Chapter, ChapterId(..))
+import Data.Chapter as Chapter exposing (Chapter, ChapterId)
 import Data.Msg exposing (Msg)
-import Data.Story as Story exposing (Story, StoryId(..))
+import Data.Story as Story exposing (Story, StoryId)
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (..)
 import Route.Route as Route
 import Views.Icon as Icon
 import Views.Theme exposing (..)
+
+
+type Select
+    = None
+    | SelectedStory ChapterId StoryId
+
+
+select : Chapter.ChapterId -> Story.StoryId -> Select
+select chapterId storyId =
+    SelectedStory chapterId storyId
+
+
+nothing : Select
+nothing =
+    None
 
 
 
@@ -40,7 +55,7 @@ defaultStory =
             , Css.animationDuration (Css.ms 200)
             , Css.animationIterationCount (Css.num 1)
             ]
-        , active
+        , Css.active
             [ backgroundColor (rgba 0 0 0 0.1)
             ]
         , descendants
@@ -94,8 +109,8 @@ link =
 -- Views
 
 
-chapter : Maybe ChapterId -> Maybe StoryId -> Chapter msg -> Html (Msg msg)
-chapter chapterId storyId chapter_ =
+chapter : Select -> Chapter msg -> Html (Msg msg)
+chapter select_ chapter_ =
     li
         [ css
             [ color (rgba 255 255 255 1)
@@ -103,21 +118,25 @@ chapter chapterId storyId chapter_ =
             ]
         ]
         [ title (Chapter.idToString chapter_.id)
-        , List.map (story chapterId storyId chapter_) chapter_.stories
+        , List.map (story select_ chapter_) chapter_.stories
             |> list []
         ]
 
 
-story : Maybe ChapterId -> Maybe StoryId -> Chapter msg -> Story msg -> Html (Msg msg)
-story chapterId storyId chapter_ story_ =
+story : Select -> Chapter msg -> Story msg -> Html (Msg msg)
+story select_ chapter_ story_ =
     let
-        active =
-            Maybe.map2 (\cId sId -> cId == chapter_.id && sId == story_.id) chapterId storyId
-                |> Maybe.withDefault False
+        selected =
+            case select_ of
+                SelectedStory cId sId ->
+                    cId == chapter_.id && sId == story_.id
+
+                None ->
+                    False
     in
     li
         [ css
-            [ if active then
+            [ if selected then
                 activeStory
 
               else
@@ -162,10 +181,10 @@ title string =
         ]
 
 
-view : Maybe ChapterId -> Maybe StoryId -> List (Chapter msg) -> Html (Msg msg)
-view chapterId storyId chapters =
+view : Select -> List (Chapter msg) -> Html (Msg msg)
+view select_ chapters =
     div
         [ css [ backgroundColor (rgba 0 0 0 0.2), position relative, Css.height (vh 80) ] ]
-        [ List.map (chapter chapterId storyId) chapters
+        [ List.map (chapter select_) chapters
             |> list [ css [ position absolute, top zero, right zero, bottom zero, left zero ] ]
         ]

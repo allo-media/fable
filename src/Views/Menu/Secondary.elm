@@ -24,6 +24,7 @@ defaultLink =
         , color (rgb 0 0 0)
         , marginBottom (rem 1)
         , fontFamilies [ "Montserrat", .value serif ]
+        , padding2 (px 15) (px 10)
         ]
 
 
@@ -37,7 +38,6 @@ defaultItem =
         [ borderBottom3 (px 1) solid (rgba 0 0 0 0.05)
         , Css.property "display" "grid"
         , Css.property "grid-template-rows" "auto 1fr"
-        , padding2 (px 10) (px 15)
         , hover
             [ Css.animationName
                 (CA.keyframes
