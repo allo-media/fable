@@ -30,10 +30,10 @@ module Fable exposing
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation exposing (Key, load, pushUrl)
 import Data.Bookmark as BookmarkData exposing (Bookmark(..))
-import Data.Chapter as Chapter exposing (Chapter, ChapterId(..))
+import Data.Chapter as Chapter exposing (Chapter)
 import Data.Msg exposing (Internal(..), Msg(..))
-import Data.Story as Story exposing (Story, StoryId(..))
-import Data.Ui as Ui exposing (Ui, UiId(..))
+import Data.Story as Story exposing (Story)
+import Data.Ui as Ui exposing (Ui)
 import Html as H
 import Html.Styled as HS
 import Route.Route as Route exposing (Route, href)
@@ -66,7 +66,7 @@ type alias Book msg =
 -}
 chapter : String -> List (Story msg) -> Chapter msg
 chapter string stories =
-    { id = ChapterId string, stories = stories }
+    { id = Chapter.createId string, stories = stories }
 
 
 {-| Story represents a list of element html (like input with different state). It needs an unique id.
@@ -78,7 +78,7 @@ chapter string stories =
 -}
 story : String -> List (Ui msg) -> Story msg
 story string uis =
-    { id = StoryId string, uis = uis }
+    { id = Story.createId string, uis = uis }
 
 
 {-| Ui represents an element of your view. It needs an unique id.
@@ -90,7 +90,7 @@ story string uis =
 -}
 ui : String -> HS.Html msg -> Ui msg
 ui string html =
-    { id = UiId string, view = html }
+    { id = Ui.createId string, view = html }
 
 
 {-| Launch a fable application with a list of chapters

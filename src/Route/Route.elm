@@ -1,8 +1,8 @@
 module Route.Route exposing (Route(..), fromUrl, href)
 
-import Data.Chapter as Chapter exposing (ChapterId(..))
-import Data.Story as Story exposing (StoryId(..))
-import Data.Ui as Ui exposing (UiId(..))
+import Data.Chapter as Chapter
+import Data.Story as Story
+import Data.Ui as Ui
 import Html.Styled exposing (Attribute)
 import Html.Styled.Attributes as Attributes
 import Url exposing (Url, percentEncode)
@@ -11,9 +11,9 @@ import Url.Parser exposing ((</>), Parser, map, oneOf, parse, s, string, top)
 
 type Route
     = Home
-    | Chapter ChapterId
-    | Story ChapterId StoryId
-    | Ui ChapterId StoryId UiId
+    | Chapter Chapter.Id
+    | Story Chapter.Id Story.Id
+    | Ui Chapter.Id Story.Id Ui.Id
 
 
 parser : Parser (Route -> a) a

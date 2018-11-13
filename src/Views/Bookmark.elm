@@ -3,10 +3,10 @@ module Views.Bookmark exposing (none, view)
 import Css exposing (..)
 import Css.Global exposing (descendants, typeSelector)
 import Data.Bookmark exposing (Bookmark(..))
-import Data.Chapter as Chapter exposing (Chapter, ChapterId(..))
+import Data.Chapter as Chapter exposing (Chapter)
 import Data.Msg exposing (Msg(..))
-import Data.Story as Story exposing (StoryId(..))
-import Data.Ui as Ui exposing (UiId(..), find)
+import Data.Story as Story
+import Data.Ui as Ui exposing (find)
 import Html.Styled as Html exposing (..)
 import Html.Styled.Attributes exposing (..)
 import Views.Icon as Icon
@@ -58,20 +58,20 @@ view bookmark chapters =
             let
                 chapter =
                     Chapter.find chapterId chapters
-                        |> Maybe.withDefault { id = ChapterId "error", stories = [] }
+                        |> Maybe.withDefault { id = Chapter.createId "error", stories = [] }
 
                 story =
                     Story.find storyId chapter.stories
-                        |> Maybe.withDefault { id = StoryId "error", uis = [] }
+                        |> Maybe.withDefault { id = Story.createId "error", uis = [] }
 
                 ui =
                     Ui.find uiId story.uis
-                        |> Maybe.withDefault { id = UiId "errror", view = div [] [] }
+                        |> Maybe.withDefault { id = Ui.createId "errror", view = div [] [] }
             in
             [ Sidebar.layout []
                 [ div []
                     [ Sidebar.logo [] [ Icon.fable ]
-                    , MenuPrimary.view (MenuPrimary.select chapterId storyId) chapters
+                    , MenuPrimary.view (Just ( chapterId, storyId )) chapters
                     ]
                 , MenuSecondary.view chapterId storyId (Just uiId) story.uis
                 ]
@@ -82,7 +82,7 @@ view bookmark chapters =
             [ Sidebar.layout []
                 [ div [ css [ Css.property "grid-column" "1/3" ] ]
                     [ Sidebar.logo [] [ Icon.fable ]
-                    , MenuPrimary.view MenuPrimary.nothing chapters
+                    , MenuPrimary.view Nothing chapters
                     ]
                 ]
             , none

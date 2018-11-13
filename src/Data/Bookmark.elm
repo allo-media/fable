@@ -1,14 +1,14 @@
 module Data.Bookmark exposing (Bookmark(..), title)
 
-import Data.Chapter as Chapter exposing (ChapterId)
-import Data.Story as Story exposing (StoryId)
-import Data.Ui as Ui exposing (UiId)
+import Data.Chapter as Chapter
+import Data.Story as Story
+import Data.Ui as Ui
 
 
 type Bookmark
-    = ChapterBookmark ChapterId
-    | StoryBookmark ChapterId StoryId
-    | UiBookmark ChapterId StoryId UiId
+    = ChapterBookmark Chapter.Id
+    | StoryBookmark Chapter.Id Story.Id
+    | UiBookmark Chapter.Id Story.Id Ui.Id
     | None
 
 

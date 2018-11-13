@@ -1,32 +1,17 @@
-module Views.Menu.Primary exposing (nothing, select, view)
+module Views.Menu.Primary exposing (view)
 
 import Css as Css exposing (..)
 import Css.Animations as CA
 import Css.Global exposing (descendants, typeSelector)
 import Data.Bookmark exposing (Bookmark(..))
-import Data.Chapter as Chapter exposing (Chapter, ChapterId)
+import Data.Chapter as Chapter exposing (Chapter)
 import Data.Msg exposing (Msg)
-import Data.Story as Story exposing (Story, StoryId)
+import Data.Story as Story exposing (Story)
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (..)
 import Route.Route as Route
 import Views.Icon as Icon
 import Views.Theme exposing (..)
-
-
-type Select
-    = None
-    | SelectedStory ChapterId StoryId
-
-
-select : Chapter.ChapterId -> Story.StoryId -> Select
-select chapterId storyId =
-    SelectedStory chapterId storyId
-
-
-nothing : Select
-nothing =
-    None
 
 
 
@@ -109,8 +94,8 @@ link =
 -- Views
 
 
-chapter : Select -> Chapter msg -> Html (Msg msg)
-chapter select_ chapter_ =
+chapter : Maybe ( Chapter.Id, Story.Id ) -> Chapter msg -> Html (Msg msg)
+chapter active chapter_ =
     li
         [ css
             [ color (rgba 255 255 255 1)
@@ -118,25 +103,25 @@ chapter select_ chapter_ =
             ]
         ]
         [ title (Chapter.idToString chapter_.id)
-        , List.map (story select_ chapter_) chapter_.stories
+        , List.map (story active chapter_) chapter_.stories
             |> list []
         ]
 
 
-story : Select -> Chapter msg -> Story msg -> Html (Msg msg)
-story select_ chapter_ story_ =
+story : Maybe ( Chapter.Id, Story.Id ) -> Chapter msg -> Story msg -> Html (Msg msg)
+story active chapter_ story_ =
     let
-        selected =
-            case select_ of
-                SelectedStory cId sId ->
+        active_ =
+            case active of
+                Just ( cId, sId ) ->
                     cId == chapter_.id && sId == story_.id
 
-                None ->
+                Nothing ->
                     False
     in
     li
         [ css
-            [ if selected then
+            [ if active_ then
                 activeStory
 
               else
@@ -181,10 +166,10 @@ title string =
         ]
 
 
-view : Select -> List (Chapter msg) -> Html (Msg msg)
-view select_ chapters =
+view : Maybe ( Chapter.Id, Story.Id ) -> List (Chapter msg) -> Html (Msg msg)
+view active chapters =
     div
         [ css [ backgroundColor (rgba 0 0 0 0.2), position relative, Css.height (vh 80) ] ]
-        [ List.map (chapter select_) chapters
+        [ List.map (chapter active) chapters
             |> list [ css [ position absolute, top zero, right zero, bottom zero, left zero ] ]
         ]
