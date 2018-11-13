@@ -25,8 +25,9 @@ main =
 
 ```
 $ npm i
-$ elm make src/Fable.elm
+$ npm start
 ```
+
 
 # Run example
 
