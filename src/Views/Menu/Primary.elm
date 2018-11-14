@@ -110,18 +110,9 @@ chapter active chapter_ =
 
 story : Maybe ( Chapter.Id, Story.Id ) -> Chapter msg -> Story msg -> Html (Msg msg)
 story active chapter_ story_ =
-    let
-        active_ =
-            case active of
-                Just ( cId, sId ) ->
-                    cId == chapter_.id && sId == story_.id
-
-                Nothing ->
-                    False
-    in
     li
         [ css
-            [ if active_ then
+            [ if active == Just ( chapter_.id, story_.id ) then
                 activeStory
 
               else
