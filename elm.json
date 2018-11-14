@@ -1,7 +1,7 @@
 {
   "type": "package",
   "name": "allo-media/fable",
-  "summary": "You want to be a real wizard, with fable you can tale some stories from you views!",
+  "summary": "Want to be a real wizard, with fable you can tale some stories from you views!",
   "license": "MIT",
   "version": "1.0.1",
   "exposed-modules": [
