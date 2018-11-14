@@ -3,7 +3,7 @@
   "name": "allo-media/fable",
   "summary": "Want to be a real wizard, with fable you can tale some stories from you views!",
   "license": "MIT",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "exposed-modules": [
     "Fable"
   ],
