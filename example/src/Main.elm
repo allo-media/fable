@@ -1,10 +1,58 @@
 module Main exposing (main)
 
+import Css exposing (..)
+import Css.Transitions exposing (easeInOut, transition)
 import Fable exposing (Book, app, chapter, story, ui)
-import Html.Styled exposing (text)
-import Ui.Button as Button
-import Ui.Input as Input
-import Ui.Panel as Panel
+import Html.Styled exposing (Html, button, input, text)
+import Html.Styled.Attributes exposing (css)
+
+
+buttonExample : String -> Html Msg
+buttonExample string =
+    button
+        [ css
+            [ textAlign center
+            , color (hex "FFF")
+            , border zero
+            , padding2 (px 12) (px 18)
+            , fontWeight (int 700)
+            , borderRadius (px 3)
+            , cursor pointer
+            , outline none
+            , backgroundColor (rgba 0 0 0 0.5)
+            , transition
+                [ Css.Transitions.background3 100 0 easeInOut
+                ]
+            ]
+        ]
+        [ text string ]
+
+
+inputExample : String -> Html Msg
+inputExample string =
+    input
+        [ css
+            [ borderRadius (px 3)
+            , backgroundColor (hex "fff")
+            , border3 (px 2) solid (rgba 208 208 208 0.5)
+            , padding2 (px 10) (px 13)
+            , marginBottom (px 10)
+            , outline none
+            , color (hex "354052")
+            , fontWeight (int 500)
+            , display block
+            , transition
+                [ Css.Transitions.border3 100 0 easeInOut
+                ]
+            , hover
+                [ borderColor (rgba 208 208 208 0.8)
+                ]
+            , focus
+                [ borderColor (rgba 130 97 230 1)
+                ]
+            ]
+        ]
+        []
 
 
 type Msg
@@ -14,29 +62,19 @@ type Msg
 main : Book Msg
 main =
     app
-        [ chapter "Forms"
-            [ story "Inputs"
-                [ ui "Default" (Input.default [] [])
-                , ui "Small" (Input.small [] [])
+        [ chapter "Chapter 1"
+            [ story "Story 1"
+                [ ui "Ui 1" (buttonExample "Example 1")
+                , ui "Ui 2" (inputExample "Example 2")
                 ]
-            , story "Button"
-                [ ui "Default" (Button.default [] [ text "Default" ])
-                , ui "Multiple"
-                    (Button.multiple []
-                        [ Button.default [] [ text "Default" ]
-                        , Button.primary [] [ text "Sign in" ]
-                        , Button.danger [] [ text "Alert ! This button delete internet !" ]
-                        , Button.warning [] [ text "Warning !" ]
-                        ]
-                    )
+            ]
+        , chapter
+            "Chapter 2"
+            [ story "Story 1"
+                [ ui "Ui 1" (buttonExample "Example 1")
                 ]
-            , story "Panel"
-                [ ui "Default"
-                    (Panel.default []
-                        [ Panel.head [] [ text "Donec consequat diam" ]
-                        , Panel.content [] [ text "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed at tortor nec leo vestibulum varius. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Cras elementum odio eu lectus iaculis pretium. Nulla vel velit venenatis, hendrerit nisl sit amet, placerat erat. Duis consectetur ante felis, ac auctor diam maximus vel. Phasellus scelerisque justo arcu, et dignissim ex laoreet non. Aenean sit amet sem sit amet eros aliquam placerat. Maecenas id viverra risus. Mauris tempor dui non commodo ornare. Mauris congue dignissim dolor quis auctor. Quisque eu erat orci. Mauris quis pretium justo, vitae gravida diam.\n\nDonec consequat diam mattis pellentesque tempus. Maecenas et interdum nisl, sit amet molestie felis. Donec euismod rhoncus enim, vel facilisis enim finibus vel. Sed sit amet diam leo. Fusce tincidunt eros quis imperdiet feugiat. Aliquam facilisis tellus fermentum tellus malesuada, ac sagittis metus volutpat. Cras eget interdum lorem. Praesent dignissim tellus eu venenatis sollicitudin. In sed volutpat mauris. Nulla venenatis sed augue sed iaculis.\n\n" ]
-                        ]
-                    )
+            , story "Story 2"
+                [ ui "Ui 2" (inputExample "Example 2")
                 ]
             ]
         ]
