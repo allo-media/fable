@@ -4,9 +4,9 @@ import Css as Css exposing (..)
 import Css.Animations as CA
 import Css.Global exposing (descendants, typeSelector)
 import Data.Bookmark exposing (Bookmark(..))
-import Data.Chapter as Chapter exposing (Chapter, ChapterId(..))
+import Data.Chapter as Chapter exposing (Chapter)
 import Data.Msg exposing (Msg)
-import Data.Story as Story exposing (Story, StoryId(..))
+import Data.Story as Story exposing (Story)
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (..)
 import Route.Route as Route
@@ -40,7 +40,7 @@ defaultStory =
             , Css.animationDuration (Css.ms 200)
             , Css.animationIterationCount (Css.num 1)
             ]
-        , active
+        , Css.active
             [ backgroundColor (rgba 0 0 0 0.1)
             ]
         , descendants
@@ -94,8 +94,8 @@ link =
 -- Views
 
 
-chapter : Maybe ChapterId -> Maybe StoryId -> Chapter msg -> Html (Msg msg)
-chapter chapterId storyId chapter_ =
+chapter : Maybe ( Chapter.Id, Story.Id ) -> Chapter msg -> Html (Msg msg)
+chapter active chapter_ =
     li
         [ css
             [ color (rgba 255 255 255 1)
@@ -103,21 +103,16 @@ chapter chapterId storyId chapter_ =
             ]
         ]
         [ title (Chapter.idToString chapter_.id)
-        , List.map (story chapterId storyId chapter_) chapter_.stories
+        , List.map (story active chapter_) chapter_.stories
             |> list []
         ]
 
 
-story : Maybe ChapterId -> Maybe StoryId -> Chapter msg -> Story msg -> Html (Msg msg)
-story chapterId storyId chapter_ story_ =
-    let
-        active =
-            Maybe.map2 (\cId sId -> cId == chapter_.id && sId == story_.id) chapterId storyId
-                |> Maybe.withDefault False
-    in
+story : Maybe ( Chapter.Id, Story.Id ) -> Chapter msg -> Story msg -> Html (Msg msg)
+story active chapter_ story_ =
     li
         [ css
-            [ if active then
+            [ if active == Just ( chapter_.id, story_.id ) then
                 activeStory
 
               else
@@ -162,10 +157,10 @@ title string =
         ]
 
 
-view : Maybe ChapterId -> Maybe StoryId -> List (Chapter msg) -> Html (Msg msg)
-view chapterId storyId chapters =
+view : Maybe ( Chapter.Id, Story.Id ) -> List (Chapter msg) -> Html (Msg msg)
+view active chapters =
     div
         [ css [ backgroundColor (rgba 0 0 0 0.2), position relative, Css.height (vh 80) ] ]
-        [ List.map (chapter chapterId storyId) chapters
+        [ List.map (chapter active) chapters
             |> list [ css [ position absolute, top zero, right zero, bottom zero, left zero ] ]
         ]

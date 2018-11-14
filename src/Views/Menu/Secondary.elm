@@ -3,10 +3,10 @@ module Views.Menu.Secondary exposing (view)
 import Css exposing (..)
 import Css.Animations as CA
 import Data.Bookmark exposing (Bookmark(..))
-import Data.Chapter as Chapter exposing (Chapter, ChapterId(..))
+import Data.Chapter as Chapter exposing (Chapter)
 import Data.Msg exposing (Msg(..))
-import Data.Story as Story exposing (Story, StoryId(..))
-import Data.Ui as Ui exposing (Ui, UiId(..))
+import Data.Story as Story exposing (Story)
+import Data.Ui as Ui exposing (Ui)
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (css, href)
 import Route.Route as Route
@@ -24,6 +24,7 @@ defaultLink =
         , color (rgb 0 0 0)
         , marginBottom (rem 1)
         , fontFamilies [ "Montserrat", .value serif ]
+        , padding2 (px 15) (px 10)
         ]
 
 
@@ -37,7 +38,6 @@ defaultItem =
         [ borderBottom3 (px 1) solid (rgba 0 0 0 0.05)
         , Css.property "display" "grid"
         , Css.property "grid-template-rows" "auto 1fr"
-        , padding2 (px 10) (px 15)
         , hover
             [ Css.animationName
                 (CA.keyframes
@@ -101,7 +101,7 @@ name =
         ]
 
 
-ui : ChapterId -> StoryId -> Maybe UiId -> Ui msg -> Html (Msg msg)
+ui : Chapter.Id -> Story.Id -> Maybe Ui.Id -> Ui msg -> Html (Msg msg)
 ui chapterId storyId uiId ui_ =
     let
         active =
@@ -120,7 +120,7 @@ ui chapterId storyId uiId ui_ =
         [ link [ Route.href (Route.Ui chapterId storyId ui_.id) ] [ name [] [ text (Ui.idToString ui_.id) ] ] ]
 
 
-view : ChapterId -> StoryId -> Maybe UiId -> List (Ui msg) -> Html (Msg msg)
+view : Chapter.Id -> Story.Id -> Maybe Ui.Id -> List (Ui msg) -> Html (Msg msg)
 view chapterId storyId uiId uis =
     List.map (ui chapterId storyId uiId) uis
         |> layout

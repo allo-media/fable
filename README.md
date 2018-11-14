@@ -25,8 +25,9 @@ main =
 
 ```
 $ npm i
-$ elm install
+$ npm start
 ```
+
 
 # Run example
 

@@ -2,7 +2,7 @@ module Views.Ui exposing (view)
 
 import Css exposing (..)
 import Data.Msg exposing (Msg(..))
-import Data.Ui as Ui exposing (Ui, UiId(..))
+import Data.Ui as Ui exposing (Ui)
 import Html.Styled as Html exposing (..)
 import Html.Styled.Attributes exposing (..)
 import Views.Theme exposing (Element, theme)
@@ -19,7 +19,7 @@ layout =
         ]
 
 
-title : UiId -> Html msg
+title : Ui.Id -> Html msg
 title uiId =
     h1
         [ css

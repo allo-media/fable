@@ -3,10 +3,10 @@ module Views.Bookmark exposing (none, view)
 import Css exposing (..)
 import Css.Global exposing (descendants, typeSelector)
 import Data.Bookmark exposing (Bookmark(..))
-import Data.Chapter as Chapter exposing (Chapter, ChapterId(..))
+import Data.Chapter as Chapter exposing (Chapter)
 import Data.Msg exposing (Msg(..))
-import Data.Story as Story exposing (StoryId(..))
-import Data.Ui as Ui exposing (UiId(..), find)
+import Data.Story as Story
+import Data.Ui as Ui exposing (find)
 import Html.Styled as Html exposing (..)
 import Html.Styled.Attributes exposing (..)
 import Views.Icon as Icon
@@ -56,33 +56,47 @@ view bookmark chapters =
     case bookmark of
         UiBookmark chapterId storyId uiId ->
             let
-                chapter =
+                ( uiList, ui ) =
                     Chapter.find chapterId chapters
-                        |> Maybe.withDefault { id = ChapterId "error", stories = [] }
+                        |> Maybe.andThen (Story.find storyId << .stories)
+                        |> Maybe.andThen
+                            (\{ id, uis } ->
+                                case uis of
+                                    ui_ :: _ ->
+                                        Just ( uis, Ui.find uiId uis )
 
-                story =
-                    Story.find storyId chapter.stories
-                        |> Maybe.withDefault { id = StoryId "error", uis = [] }
-
-                ui =
-                    Ui.find uiId story.uis
-                        |> Maybe.withDefault { id = UiId "errror", view = div [] [] }
+                                    [] ->
+                                        Just ( uis, Nothing )
+                            )
+                        |> Maybe.withDefault ( [], Nothing )
             in
-            [ Sidebar.layout []
-                [ div []
-                    [ Sidebar.logo [] [ Icon.fable ]
-                    , MenuPrimary.view (Just chapterId) (Just storyId) chapters
+            case ( uiList, ui ) of
+                ( uis_, Just ui_ ) ->
+                    [ Sidebar.layout []
+                        [ div []
+                            [ Sidebar.logo [] [ Icon.fable ]
+                            , MenuPrimary.view (Just ( chapterId, storyId )) chapters
+                            ]
+                        , MenuSecondary.view chapterId storyId (Just uiId) uis_
+                        ]
+                    , VUi.view ui_
                     ]
-                , MenuSecondary.view chapterId storyId (Just uiId) story.uis
-                ]
-            , VUi.view ui
-            ]
+
+                ( uis_, Nothing ) ->
+                    [ Sidebar.layout []
+                        [ div [ css [ Css.property "grid-column" "1/3" ] ]
+                            [ Sidebar.logo [] [ Icon.fable ]
+                            , MenuPrimary.view Nothing chapters
+                            ]
+                        ]
+                    , none
+                    ]
 
         _ ->
             [ Sidebar.layout []
                 [ div [ css [ Css.property "grid-column" "1/3" ] ]
                     [ Sidebar.logo [] [ Icon.fable ]
-                    , MenuPrimary.view Nothing Nothing chapters
+                    , MenuPrimary.view Nothing chapters
                     ]
                 ]
             , none
