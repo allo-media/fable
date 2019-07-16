@@ -4,7 +4,7 @@ import Css exposing (..)
 import Css.Global exposing (..)
 import Data.Msg exposing (Msg)
 import Html exposing (Html)
-import Html.Styled as HS exposing (div, text, toUnstyled)
+import Html.Styled as HS exposing (toUnstyled)
 import Html.Styled.Attributes exposing (css)
 import Views.Theme exposing (theme)
 
@@ -28,7 +28,7 @@ view content =
                 , after [ boxSizing borderBox ]
                 ]
             ]
-        , div
+        , HS.div
             [ css
                 [ Css.property "display" "grid"
                 , Css.property "grid-template-columns" "13fr 21fr"
